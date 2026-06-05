@@ -52,6 +52,7 @@ jobs:
           cat /boot/cmdline.txt
 
       - name: Build initramfs (no autodetect)
+        continue-on-error: true
         run: |
           # Remove autodetect so container kernel doesn't strip alioth modules
           sed -i 's/ autodetect//' /etc/mkinitcpio.conf

@@ -14,7 +14,7 @@ makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'uboot-tools' '
 options=('!strip')
 _config="config-qcom-sm8250-alioth.aarch64"
 source=("$url/archive/refs/heads/$_branch.tar.gz"
-        "config-qcom-sm8250-alioth.aarch64::https://raw.githubusercontent.com/Ayushskull7/alioth-nightly-builds/main/alioth.config"
+        'config-qcom-sm8250-alioth.aarch64'
         'linux-alioth.preset'
         'cmdline.txt')
 sha512sums=('SKIP'

@@ -1,0 +1,187 @@
+name: Build Armtix Alioth rootfs (runit)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'ARMtix runit base tarball URL'
+        required: false
+        default: 'https://armtix.artixlinux.org/images/armtix-runit-20260124.tar.xz'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set build metadata
+        id: meta
+        run: |
+          echo "date=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+          echo "name=armtix-alioth-runit-$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+
+      - name: Install host tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            arch-install-scripts \
+            e2fsprogs \
+            xz-utils \
+            zstd \
+            curl \
+            android-tools-fsutils || \
+          sudo apt-get install -y --no-install-recommends \
+            arch-install-scripts \
+            e2fsprogs \
+            xz-utils \
+            zstd \
+            curl
+
+      - name: Create and format loop image
+        run: |
+          fallocate -l 12G rootfs.img
+          mkfs.ext4 -L armtix rootfs.img
+          sudo mkdir -p mnt
+          sudo mount -o loop rootfs.img mnt/
+
+      - name: Download and extract ARMtix runit base
+        run: |
+          echo "Base: ${{ inputs.base_url }}"
+          curl -L --retry 3 "${{ inputs.base_url }}" | sudo tar -xJf - -C mnt/ --numeric-owner
+
+      - name: Configure base system
+        run: |
+          echo "nameserver 1.1.1.1" | sudo tee -a mnt/etc/resolv.conf
+          echo "xiaomi-alioth" | sudo tee mnt/etc/hostname
+          printf "127.0.0.1  localhost\n::1        localhost\n127.0.1.1  xiaomi-alioth\n" | \
+            sudo tee -a mnt/etc/hosts
+
+      - name: Configure pacman.conf
+        run: |
+          sudo tee /tmp/repos.conf << 'EOF'
+[alioth]
+SigLevel = Optional TrustAll
+Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
+
+[pipa]
+SigLevel = Optional TrustAll
+Server = https://github.com/rmuxnet/PKGBUILDs-pipa/releases/download/repo
+
+EOF
+          # Inject custom repos above [system]
+          sudo sed -i "/^\[system\]/{ r /tmp/repos.conf
+}" mnt/etc/pacman.conf
+          # Ensure SigLevel=Never for unsigned ARMtix repos
+          sudo sed -i -E '/^\[(system|world|galaxy)\]/{n; s/^#?(SigLevel\s*=.*)$/SigLevel = Never/; t; /^\[/!{ i SigLevel = Never
+}}' mnt/etc/pacman.conf
+
+      - name: Configure mkinitcpio.conf
+        run: |
+          # Remove btrfs module
+          sudo sed -i 's/\bbtrfs\b//' mnt/etc/mkinitcpio.conf
+
+      - name: Configure vconsole.conf
+        run: |
+          echo "FONT=ter-232n" | sudo tee mnt/etc/vconsole.conf
+
+      - name: Init pacman keyring
+        run: |
+          sudo arch-chroot mnt/ pacman-key --init
+          sudo arch-chroot mnt/ pacman-key --populate artix || true
+
+      - name: Remove generic aarch64 kernels
+        run: |
+          sudo arch-chroot mnt/ pacman -Rdd --noconfirm \
+            linux-aarch64 linux-aarch64-headers \
+            linux-aarch64-lts linux-aarch64-lts-headers 2>/dev/null || true
+
+      - name: Update and install packages
+        run: |
+          sudo arch-chroot mnt/ pacman -Syu --noconfirm --needed \
+            base-devel \
+            linux-alioth \
+            linux-alioth-headers \
+            device-xiaomi-alioth-runit \
+            terminus-font \
+            networkmanager-runit \
+            chrony-runit \
+            elogind-runit \
+            mesa \
+            widevine
+
+      - name: Enable runit services
+        run: |
+          sudo arch-chroot mnt/ /bin/bash -c "
+            mkdir -p /etc/runit/runsvdir/default
+            for svc in NetworkManager chronyd swclock-offset qbootctl hexagonrpcd-sdsp iio-sensor-proxy-libssc; do
+              if [ -d /etc/runit/sv/\$svc ]; then
+                ln -sf /etc/runit/sv/\$svc /etc/runit/runsvdir/default/\$svc
+                echo 'enabled: '\$svc
+              else
+                echo 'WARNING: service not found: '\$svc
+              fi
+            done
+          "
+
+      - name: Grab boot.img
+        run: |
+          mkdir -p artifacts
+          sudo cp mnt/boot/boot.img \
+            artifacts/armtix-alioth-runit-${{ steps.meta.outputs.date }}-boot.img
+
+      - name: Clean up rootfs
+        run: |
+          sudo arch-chroot mnt/ pacman -Scc --noconfirm || true
+          sudo rm -rf mnt/tmp/*
+          sudo rm -f mnt/root/.bash_history
+
+      - name: Unmount
+        run: |
+          sudo umount mnt/ || sudo umount -l mnt/
+
+      - name: Shrink image
+        run: |
+          e2fsck -fy rootfs.img
+          resize2fs -M rootfs.img
+          BLOCKS=$(tune2fs -l rootfs.img | awk '/^Block count:/{print $3}')
+          BSIZE=$(tune2fs -l rootfs.img | awk '/^Block size:/{print $3}')
+          truncate -s $((BLOCKS * BSIZE)) rootfs.img
+
+      - name: Rename and create sparse image
+        run: |
+          DATE=${{ steps.meta.outputs.date }}
+          cp rootfs.img armtix-alioth-runit-${DATE}.img
+          img2simg armtix-alioth-runit-${DATE}.img armtix-alioth-runit-${DATE}.simg 2>/dev/null || true
+
+      - name: Compress
+        run: |
+          DATE=${{ steps.meta.outputs.date }}
+          tar -I 'xz -9e -T0' -cf armtix-alioth-runit-${DATE}.tar.xz \
+            armtix-alioth-runit-${DATE}.img
+          tar -I 'zstd --ultra -22 --long -T0' -cf armtix-alioth-runit-${DATE}.tar.zst \
+            armtix-alioth-runit-${DATE}.img
+
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: armtix-alioth-runit-${{ steps.meta.outputs.date }}
+          name: Armtix Alioth runit — ${{ steps.meta.outputs.date }}
+          body: |
+            Armtix Alioth rootfs (runit) built on ${{ steps.meta.outputs.date }}.
+
+            Base: ARMtix runit + linux-alioth 7.0.11
+
+            **Install:**
+            1. Flash `*-boot.img` to boot partition via fastboot or dd
+            2. Extract `*.tar.xz` or `*.tar.zst` to your armtix partition (labeled `armtix`)
+
+            Default login — user: `armtix`, password: `armtix`, root password: `armtix`
+          files: |
+            armtix-alioth-runit-${{ steps.meta.outputs.date }}.tar.xz
+            armtix-alioth-runit-${{ steps.meta.outputs.date }}.tar.zst
+            artifacts/armtix-alioth-runit-${{ steps.meta.outputs.date }}-boot.img

@@ -94,15 +94,8 @@ jobs:
           CheckSpace
           ParallelDownloads = 5
 
-          [alioth]
-          SigLevel = Optional TrustAll
-          Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
-
-          [pipa]
-          SigLevel = Optional TrustAll
-          Server = https://github.com/rmuxnet/PKGBUILDs-pipa/releases/download/repo
-
           [armtix]
+          SigLevel = Never
           Server = https://repo.armtixlinux.org/armtix/os/$arch
 
           [system]
@@ -146,9 +139,27 @@ jobs:
             linux-aarch64 linux-aarch64-headers \
             linux-aarch64-lts linux-aarch64-lts-headers 2>/dev/null || true
 
-      - name: Update and install packages
+      - name: Update base system
         run: |
-          sudo arch-chroot mnt/ pacman -Syu --noconfirm --needed \
+          sudo arch-chroot mnt/ pacman -Syu --noconfirm
+
+      - name: Add device repos to pacman.conf
+        run: |
+          sudo tee -a mnt/etc/pacman.conf << 'EOF'
+
+          [alioth]
+          SigLevel = Optional TrustAll
+          Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
+
+          [pipa]
+          SigLevel = Optional TrustAll
+          Server = https://github.com/rmuxnet/PKGBUILDs-pipa/releases/download/repo
+          EOF
+          sudo arch-chroot mnt/ pacman -Sy --noconfirm
+
+      - name: Install device packages
+        run: |
+          sudo arch-chroot mnt/ pacman -S --noconfirm --needed \
             base-devel \
             linux-alioth \
             linux-alioth-headers \

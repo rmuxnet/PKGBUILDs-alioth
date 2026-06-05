@@ -52,7 +52,7 @@ jobs:
       - name: Download and extract ARMtix runit base
         run: |
           echo "Base: ${{ inputs.base_url }}"
-          curl -L --retry 3 "${{ inputs.base_url }}" | sudo tar -xJf - -C mnt/ --numeric-owner
+          curl -L --retry 3 -A "Wget/1.21.1" "${{ inputs.base_url }}" | sudo tar -xJf - -C mnt/ --numeric-owner
 
       - name: Configure base system
         run: |

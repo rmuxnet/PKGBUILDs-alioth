@@ -63,22 +63,22 @@ jobs:
 
       - name: Configure pacman.conf
         run: |
-          sudo tee /tmp/repos.conf << 'EOF'
-[alioth]
-SigLevel = Optional TrustAll
-Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
-
-[pipa]
-SigLevel = Optional TrustAll
-Server = https://github.com/rmuxnet/PKGBUILDs-pipa/releases/download/repo
-
-EOF
+          {
+            echo '[alioth]'
+            echo 'SigLevel = Optional TrustAll'
+            echo 'Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo'
+            echo ''
+            echo '[pipa]'
+            echo 'SigLevel = Optional TrustAll'
+            echo 'Server = https://github.com/rmuxnet/PKGBUILDs-pipa/releases/download/repo'
+            echo ''
+          } | sudo tee /tmp/repos.conf
           # Inject custom repos above [system]
-          sudo sed -i "/^\[system\]/{ r /tmp/repos.conf
-}" mnt/etc/pacman.conf
-          # Ensure SigLevel=Never for unsigned ARMtix repos
-          sudo sed -i -E '/^\[(system|world|galaxy)\]/{n; s/^#?(SigLevel\s*=.*)$/SigLevel = Never/; t; /^\[/!{ i SigLevel = Never
-}}' mnt/etc/pacman.conf
+          sudo sed -i '/^\[system\]/r /tmp/repos.conf' mnt/etc/pacman.conf
+          # SigLevel=Never for unsigned ARMtix repos
+          for repo in system world galaxy; do
+            sudo sed -i "/^\[${repo}\]/a SigLevel = Never" mnt/etc/pacman.conf
+          done
 
       - name: Configure mkinitcpio.conf
         run: |

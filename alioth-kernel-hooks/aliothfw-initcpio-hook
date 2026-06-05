@@ -4,8 +4,9 @@ build() {
     add_dir "/usr/lib/firmware"
 
     # Qualcomm SM8250 (Xiaomi alioth)
-    add_file "/usr/lib/firmware/qcom/a650_sqe.fw.zst"
-    add_file "/usr/lib/firmware/qcom/a650_gmu.bin.zst"
+    for _fw in a650_sqe.fw.zst a650_sqe.fw a650_gmu.bin.zst a650_gmu.bin; do
+        [[ -f "/usr/lib/firmware/qcom/$_fw" ]] && add_file "/usr/lib/firmware/qcom/$_fw"
+    done
     add_dir "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth"
 
     add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/a650_zap.mbn"

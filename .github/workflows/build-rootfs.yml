@@ -2,11 +2,6 @@ name: Build Armtix Alioth rootfs (runit)
 
 on:
   workflow_dispatch:
-    inputs:
-      base_url:
-        description: 'ARMtix runit base tarball URL'
-        required: false
-        default: 'https://armtix.artixlinux.org/images/armtix-runit-20260124.tar.xz'
 
 permissions:
   contents: write
@@ -29,18 +24,14 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            arch-install-scripts \
             e2fsprogs \
             xz-utils \
             zstd \
-            curl \
             android-tools-fsutils || \
           sudo apt-get install -y --no-install-recommends \
-            arch-install-scripts \
             e2fsprogs \
             xz-utils \
-            zstd \
-            curl
+            zstd
 
       - name: Create and format loop image
         run: |
@@ -49,10 +40,40 @@ jobs:
           sudo mkdir -p mnt
           sudo mount -o loop rootfs.img mnt/
 
-      - name: Download and extract ARMtix runit base
+      - name: Bootstrap ARMtix runit base via pacstrap
         run: |
-          echo "Base: ${{ inputs.base_url }}"
-          curl -L --retry 3 -A "Wget/1.21.1" "${{ inputs.base_url }}" | sudo tar -xJf - -C mnt/ --numeric-owner
+          cat > /tmp/bootstrap.conf << 'CONF'
+          [options]
+          Architecture = aarch64
+          SigLevel = Never
+
+          [armtix]
+          Server = https://repo.armtixlinux.org/armtix/os/$arch
+
+          [system]
+          SigLevel = Never
+          Server = https://repo.armtixlinux.org/system/os/$arch
+
+          [world]
+          SigLevel = Never
+          Server = https://repo.armtixlinux.org/world/os/$arch
+
+          [galaxy]
+          SigLevel = Never
+          Server = https://repo.armtixlinux.org/galaxy/os/$arch
+          CONF
+
+          docker run --rm --privileged \
+            -v "$(realpath mnt)":/target \
+            -v /tmp/bootstrap.conf:/bootstrap.conf \
+            menci/archlinuxarm:base-devel \
+            bash -c "
+              pacman -Sy --noconfirm arch-install-scripts
+              pacstrap -c /target -C /bootstrap.conf \
+                base runit-artix elogind \
+                dhcpcd haveged openssh ntp nano sudo \
+                e2fsprogs btrfs-progs xfsprogs f2fs-tools dosfstools
+            "
 
       - name: Configure base system
         run: |
@@ -63,31 +84,53 @@ jobs:
 
       - name: Configure pacman.conf
         run: |
-          {
-            echo '[alioth]'
-            echo 'SigLevel = Optional TrustAll'
-            echo 'Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo'
-            echo ''
-            echo '[pipa]'
-            echo 'SigLevel = Optional TrustAll'
-            echo 'Server = https://github.com/rmuxnet/PKGBUILDs-pipa/releases/download/repo'
-            echo ''
-          } | sudo tee /tmp/repos.conf
-          # Inject custom repos above [system]
-          sudo sed -i '/^\[system\]/r /tmp/repos.conf' mnt/etc/pacman.conf
-          # SigLevel=Never for unsigned ARMtix repos
-          for repo in system world galaxy; do
-            sudo sed -i "/^\[${repo}\]/a SigLevel = Never" mnt/etc/pacman.conf
-          done
+          sudo tee mnt/etc/pacman.conf << 'EOF'
+          [options]
+          HoldPkg     = pacman glibc
+          Architecture = aarch64
+          CheckSpace
+          ParallelDownloads = 5
+
+          [alioth]
+          SigLevel = Optional TrustAll
+          Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
+
+          [pipa]
+          SigLevel = Optional TrustAll
+          Server = https://github.com/rmuxnet/PKGBUILDs-pipa/releases/download/repo
+
+          [armtix]
+          Server = https://repo.armtixlinux.org/armtix/os/$arch
+
+          [system]
+          SigLevel = Never
+          Server = https://repo.armtixlinux.org/system/os/$arch
+
+          [world]
+          SigLevel = Never
+          Server = https://repo.armtixlinux.org/world/os/$arch
+
+          [galaxy]
+          SigLevel = Never
+          Server = https://repo.armtixlinux.org/galaxy/os/$arch
+          EOF
 
       - name: Configure mkinitcpio.conf
         run: |
-          # Remove btrfs module
           sudo sed -i 's/\bbtrfs\b//' mnt/etc/mkinitcpio.conf
 
       - name: Configure vconsole.conf
         run: |
           echo "FONT=ter-232n" | sudo tee mnt/etc/vconsole.conf
+
+      - name: Create default user
+        run: |
+          sudo arch-chroot mnt/ bash -c "
+            useradd -m -G wheel -s /bin/bash armtix
+            echo 'armtix:armtix' | chpasswd
+            echo 'root:armtix' | chpasswd
+            echo '%wheel ALL=(ALL) ALL' >> /etc/sudoers
+          "
 
       - name: Init pacman keyring
         run: |
@@ -174,7 +217,7 @@ jobs:
           body: |
             Armtix Alioth rootfs (runit) built on ${{ steps.meta.outputs.date }}.
 
-            Base: ARMtix runit + linux-alioth 7.0.11
+            Base: ARMtix runit (pacstrap) + linux-alioth 7.0.11
 
             **Install:**
             1. Flash `*-boot.img` to boot partition via fastboot or dd

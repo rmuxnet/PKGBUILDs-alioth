@@ -66,7 +66,7 @@ jobs:
           pacman -Syu --noconfirm --overwrite '*'
           # Install standard packages from ALARM repos (always available)
           pacman -S --noconfirm --needed --overwrite '*' \
-            git meson ninja cmake \
+            git meson ninja cmake cython \
             python python-setuptools squashfs-tools \
             bluez bluez-libs bluez-utils \
             libqmi protobuf-c gobject-introspection libqrtr-glib \

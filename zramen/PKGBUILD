@@ -1,0 +1,28 @@
+# nous
+
+pkgname=zramen
+pkgdesc="Manage zram swap space"
+pkgver=1.0.1
+pkgrel=1
+arch=('any')
+url="https://github.com/atweiden/zramen"
+license=('GLWTPL')
+source=(
+    "$url/releases/download/${pkgver}/zramen-${pkgver}.tar.gz"
+    "99-zramen.conf"
+)
+sha256sums=(
+    '01e7d90891151e08dc3a6630c15da5795d4ed7a7ebabfbb585ecfe6defa8130d'
+    '18bd90a40e154d339fcfd6e8c8bb4a5fc2340f7c77abd0fb7eb79cfc117ba19e'
+)
+
+package() {
+    echo "${srcdir}/${pkgname}-${pkgver}"
+    cd "${srcdir}/${pkgname}-${pkgver}"
+
+    # Install zramen
+    install -Dm755 zramen -t "$pkgdir/usr/bin/"
+
+    # Optimizing swap on zram
+    install -Dm644 "$srcdir/99-zramen.conf" -t "$pkgdir/etc/sysctl.d/"
+}

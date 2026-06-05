@@ -1,0 +1,32 @@
+pkgname=device-xiaomi-alioth-runit
+pkgdesc="Package containing Runit configurations for Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth)"
+pkgver=1
+pkgrel=1
+url="https://postmarketos.org"
+license=('MIT')
+arch=('aarch64')
+groups=('runit-alioth-armtix')
+depends=(
+	'device-xiaomi-alioth'
+	'hexagonrpcd-runit'
+	'qbootctl-runit'
+	'iio-sensor-proxy-libssc-runit'
+	'swclock-offset-runit'
+	'runit'
+)
+source=(
+	'hexagonrpcd.conf'
+	'sensor-fix.sh'
+)
+sha512sums=(
+	'SKIP'
+	'SKIP'
+)
+
+package() {
+	install -Dm644 "$srcdir"/hexagonrpcd.conf "$pkgdir"/etc/runit/sv/hexagonrpcd-sdsp/conf
+	install -Dm644 "$srcdir"/hexagonrpcd.conf "$pkgdir"/etc/runit/sv/hexagonrpcd-adsp-rootpd/conf
+	install -Dm644 "$srcdir"/hexagonrpcd.conf "$pkgdir"/etc/runit/sv/hexagonrpcd-adsp-sensorpd/conf
+
+	install -Dm755 "${srcdir}/sensor-fix.sh" "${pkgdir}/usr/lib/elogind/system-sleep/sensor-fix.sh"
+}

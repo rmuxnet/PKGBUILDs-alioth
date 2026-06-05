@@ -1,0 +1,22 @@
+# Maintainer: Danct12 <danct12@disroot.org>
+
+pkgname=libglibutil
+pkgver=1.0.81
+pkgrel=1
+pkgdesc="Library of glib utilities"
+arch=('x86_64' 'i686' 'armv7h' 'aarch64')
+url="https://github.com/sailfishos/libglibutil"
+license=('BSD-3-Clause')
+depends=('glib2')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/sailfishos/libglibutil/archive/refs/tags/${pkgver}.tar.gz")
+sha512sums=('65e04f53d5f28618dd6147df40f3bc5cd27e1b0f1644304db24a42fefc2c2a41ffcc87a52e640326525ec5f0bb23fe00e3f54a3796cfbe9cf7697931cb5c1d06')
+
+build() {
+  cd $pkgname-$pkgver
+  make KEEP_SYMBOLS=1 release pkgconfig
+}
+
+package() {
+  cd $pkgname-$pkgver
+  make install-dev DESTDIR="${pkgdir}"
+}

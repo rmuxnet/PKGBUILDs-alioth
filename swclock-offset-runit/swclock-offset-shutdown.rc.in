@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# sourcing our current rc.conf requires this to be a bash script
+. /usr/lib/rc/functions
+
+case "$1" in
+    stop)
+        stat_busy "Saving swclock-offset"
+        SWCLOCK_PATH/swclock-offset-shutdown || stat_die swclock-offset-shutdown
+        stat_done
+        ;;
+    *)
+        echo "usage: $0 {stop}"
+        exit 1
+        ;;
+esac

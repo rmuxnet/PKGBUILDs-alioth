@@ -1,0 +1,9 @@
+#!/bin/sh
+
+post_install() {
+    ln -s /etc/runit/sv/iio-sensor-proxy-libssc /run/runit/service
+}
+
+pre_remove() {
+    unlink /run/runit/service/iio-sensor-proxy-libssc
+}

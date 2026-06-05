@@ -1,0 +1,7 @@
+#!/bin/sh
+[ -r ./conf ] && . ./conf
+
+args="-f /dev/fastrpc-adsp -d adsp"
+[ -n "$hexagonrpcd_fw_dir" ] && args="$args -R ${hexagonrpcd_fw_dir}"
+
+exec chpst -u fastrpc:fastrpc /usr/bin/hexagonrpcd $args

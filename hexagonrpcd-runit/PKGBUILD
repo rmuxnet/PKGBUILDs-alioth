@@ -1,0 +1,28 @@
+pkgname="hexagonrpcd-runit"
+pkgdesc="Qualcomm HexagonFS daemon (Runit init scripts)"
+pkgver=0.4.0
+pkgrel=2
+arch=('any')
+url="https://gitlab.com/sdm845-mainline/hexagonrpc/"
+license=(GPL-3.0-or-later)
+groups=('runit-pipa-armtix')
+depends=('hexagonrpcd' 'runit')
+_pkgname=hexagonrpcd
+install="$pkgname.install"
+source=(
+    "$_pkgname-adsp-rootpd.run"
+    "$_pkgname-adsp-sensorspd.run"
+    "$_pkgname-sdsp.run"
+)
+sha512sums=(
+    '0276f12db0b8bcea66d7a10543626cd72116eed85c27c70c98ed4c9ece8acdb4cb921b8e873fb9c2a0f9beb1ae85187a7408f13a7053099153f622d57cff4cfc'
+    '0a6084c640d876608a35166c8524fda71e4d3e4eff3e3eca81cae0b4bd5f98c5dc94301f204e4ad2aaf09b07ff4ad2f4ee619f162e42ceeabe41433d3719a465'
+    '3f8dbf4c8073801c826ecee9cd4f2ab6a79c91428dd4e6a60d5da796c6bcb811c40fe3d42e6ac4d1c7b3a4d83fabc04ba902f6f34168db1f55032e724b2f1a9f'
+)
+
+package() {
+    # Add Services for Runit
+	install -Dm755 $srcdir/$_pkgname-adsp-rootpd.run "$pkgdir/etc/runit/sv/$_pkgname-adsp-rootpd/run"
+	install -Dm755 $srcdir/$_pkgname-adsp-sensorspd.run "$pkgdir/etc/runit/sv/$_pkgname-adsp-sensorspd/run"
+	install -Dm755 $srcdir/$_pkgname-sdsp.run "$pkgdir/etc/runit/sv/$_pkgname-sdsp/run"
+}

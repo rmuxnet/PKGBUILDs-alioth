@@ -1,0 +1,39 @@
+# Maintainer: Raihan Ahamed (raihan2000) <raihan1999ahamed@gmail.com>
+
+pkgname=hexagonrpcd
+pkgdesc="Qualcomm HexagonFS daemon"
+pkgver=0.4.0
+pkgrel=3
+arch=('any')
+license=(GPL-3.0-or-later)
+url="https://gitlab.com/sdm845-mainline/hexagonrpc/"
+depends=('glibc')
+makedepends=(
+    linux-headers
+    meson
+    git
+)
+install="$pkgname.pre-install"
+source=(
+    "$pkgname-$pkgver.tar.gz::https://github.com/linux-msm/hexagonrpc/archive/refs/tags/v$pkgver.tar.gz"
+    "10-fastrpc.rules"
+)
+sha512sums=(
+    "18ebe4beeed97018243bec5043b8395c07c76f1174085e41a32648fd481485076fefffa091700ca1f72163687405456e5537aa538bc4f08fecacb3f83e3a82d8"
+    "f931cf5f901a7c17ffb0eb194b5de2c532fd238692898bf264c484b13b93119c9727bd8f8daf6a7d1668cc9108a9a0662231d300c6f1376e3e4edd3ce41d235d"
+)
+
+build() {
+  artix-meson -Db_lto=true "$srcdir/hexagonrpc-$pkgver" build
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="$pkgdir" meson install --no-rebuild -C build
+
+  echo -e 'g fastrpc\nu fastrpc - "Qualcomm HexagonFS service" /var/lib/fastrpc' |
+    install -Dm644 /dev/stdin "$pkgdir/usr/lib/sysusers.d/fastrpc.conf"
+
+  # Allow access for FastRPC node for FastRPC user/group
+  install -Dm 644 "$srcdir"/10-fastrpc.rules -t "$pkgdir"/usr/lib/udev/rules.d/
+}

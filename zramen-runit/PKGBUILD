@@ -1,0 +1,26 @@
+# Contributor: linuxer <https://gitea.artixlinux.org/linuxer>
+
+pkgname="zramen-runit"
+pkgdesc="runit script for zramen"
+pkgver=1.0.1
+pkgrel=1
+arch=('any')
+url="https://github.com/atweiden/zramen"
+license=('Unlicense')
+groups=('runit-pipa-armtix')
+depends=('zramen' 'runit')
+_pkgname=zramen
+source=("https://github.com/atweiden/$_pkgname/releases/download/${pkgver}/$_pkgname-${pkgver}.tar.gz")
+sha256sums=('01e7d90891151e08dc3a6630c15da5795d4ed7a7ebabfbb585ecfe6defa8130d')
+
+package() {
+    echo "${srcdir}/${_pkgname}-${pkgver}"
+    cd "${srcdir}/${_pkgname}-${pkgver}"
+
+    # Install runit service
+    install -Dm755 "sv/$_pkgname/run" "$pkgdir/etc/runit/sv/$_pkgname/run"
+    install -Dm755 "sv/$_pkgname/finish" "$pkgdir/etc/runit/sv/$_pkgname/finish"
+
+    # Add zramen related config
+    install -Dm644 "sv/$_pkgname/conf" "$pkgdir/etc/runit/sv/$_pkgname/conf"
+}

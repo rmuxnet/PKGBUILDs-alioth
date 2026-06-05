@@ -1,0 +1,22 @@
+pkgname="qbootctl"
+pkgdesc="Qualcomm bootctl HAL for Linux"
+pkgver=0.2.2
+pkgrel=1
+arch=('aarch64')
+url="https://github.com/linux-msm/qbootctl"
+license=('GPL-3.0-or-later')
+depends=('glibc' 'zlib' 'gcc-libs' 'linux-headers')
+makedepends=('git' 'meson' 'gcc' 'cmake' 'ninja')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
+sha256sums=('e66b361f86fac413f6a96974b4045a1fbc385f9eb6cee7fa8a26e0ca77c74a51')
+
+build() {
+	artix-meson $pkgname-$pkgver build
+	meson compile -C build
+}
+
+package() {
+	DESTDIR="$pkgdir" ninja -C $srcdir/build install
+	install -Dm644 $pkgname-$pkgver/LICENSE \
+		"$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

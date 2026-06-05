@@ -1,0 +1,27 @@
+# Maintainer: Dylan Van Assche <me@dylanvanassche.be>
+
+pkgname=bootmac
+pkgver=0.7.1
+pkgrel=3
+pkgdesc="Configure MAC addresses at boot"
+arch=('any')
+url="https://gitlab.postmarketos.org/postmarketOS/bootmac"
+license=('GPL3')
+depends=('bluez' 'bluez-utils' 'bluez-libs')
+source=("https://gitlab.postmarketos.org/postmarketOS/bootmac/-/archive/v$pkgver/bootmac-v$pkgver.tar.gz")
+sha512sums=('1831fa7c7f1e485ee272bcc1ed800de51f368dc5a024e572b1e5d8a9085f7ac73bb05ad13f41d0691859b634625c76c810cda815eeb558f24e67884924532ad5')
+
+package() {
+	cd "$srcdir/$pkgname-v$pkgver"
+	
+	# Install udev rules
+	install -Dm644 bootmac-bluetooth.rules \
+		"$pkgdir/usr/lib/udev/rules.d/90-bootmac-bluetooth.rules"
+
+	install -Dm644 bootmac-wifi.rules \
+		"$pkgdir/usr/lib/udev/rules.d/90-bootmac-wifi.rules"
+	
+	# Install main binary
+	install -Dm755 bootmac \
+		"$pkgdir/usr/bin/bootmac"
+}

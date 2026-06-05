@@ -1,0 +1,10 @@
+#!/bin/sh
+
+post_install() {
+    # Enable hexagonrpcd-sdsp by default, it's needed for iio-sensor-proxy
+    ln -s /etc/runit/sv/hexagonrpcd-sdsp /run/runit/service
+}
+
+pre_remove() {
+    unlink /run/runit/service/hexagonrpcd-sdsp
+}

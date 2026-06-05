@@ -161,9 +161,19 @@ jobs:
         run: |
           sudo arch-chroot mnt/ pacman -S --noconfirm --needed \
             base-devel \
-            linux-alioth \
-            linux-alioth-headers \
+            linux-alioth-NoLTO \
+            linux-alioth-NoLTO-headers \
+            device-xiaomi-alioth \
             device-xiaomi-alioth-runit \
+            linux-firmware-alioth-adreno \
+            linux-firmware-alioth-adsp \
+            linux-firmware-alioth-cdsp \
+            linux-firmware-alioth-ipa \
+            linux-firmware-alioth-slpi \
+            linux-firmware-alioth-venus \
+            linux-firmware-alioth-cirrus \
+            linux-firmware-alioth-focaltech \
+            linux-firmware-alioth-hexagonfs \
             terminus-font \
             networkmanager-runit \
             chrony-runit \

@@ -1,0 +1,143 @@
+name: Build alioth kernel (Clang LTO) + pacman repo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'linux-alioth/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build-none:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+
+    name: build (LTO=none)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain & build deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+
+      - name: Create unprivileged build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build (Clang, LTO=none)
+        working-directory: linux-alioth
+        run: |
+          chmod +x build.sh
+          sudo -u builder bash build.sh none
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-none
+          path: linux-alioth/*.pkg.tar.*
+          if-no-files-found: error
+
+  build-thin:
+    needs: build-none
+    if: always()
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+
+    name: build (LTO=thin)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain & build deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+
+      - name: Create unprivileged build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build (Clang, LTO=thin)
+        working-directory: linux-alioth
+        run: |
+          chmod +x build.sh
+          sudo -u builder bash build.sh thin
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-thin
+          path: linux-alioth/*.pkg.tar.*
+          if-no-files-found: error
+
+  publish:
+    needs: [build-none, build-thin]
+    if: |
+      always() &&
+      (needs.build-none.result == 'success' || needs.build-thin.result == 'success')
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+
+    steps:
+      - name: Install repo tools
+        run: pacman -Syu --noconfirm --needed pacman
+
+      - name: Download none packages
+        uses: actions/download-artifact@v4
+        with:
+          name: pkg-none
+          path: dist
+        continue-on-error: true
+
+      - name: Download thin packages
+        uses: actions/download-artifact@v4
+        with:
+          name: pkg-thin
+          path: dist
+        continue-on-error: true
+
+      - name: Build pacman repo database
+        working-directory: dist
+        run: |
+          repo-add alioth.db.tar.zst *.pkg.tar.*
+          rm -f alioth.db alioth.files
+          cp -f alioth.db.tar.zst    alioth.db
+          cp -f alioth.files.tar.zst alioth.files
+
+      - name: Publish repo to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: repo
+          name: alioth pacman repo
+          body: |
+            Rolling pacman repo for the alioth kernel (Clang: Thin / No LTO).
+
+            Add to /etc/pacman.conf:
+
+              [alioth]
+              SigLevel = Optional TrustAll
+              Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
+          files: |
+            dist/*.pkg.tar.*
+            dist/alioth.db
+            dist/alioth.files

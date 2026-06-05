@@ -71,7 +71,7 @@ jobs:
               pacman -Sy --noconfirm arch-install-scripts
               cp /bootstrap.conf /etc/pacman.conf
               pacstrap -c /target \
-                base runit runit-system elogind-runit \
+                base mkinitcpio runit runit-system elogind-runit \
                 dhcpcd haveged openssh ntp nano sudo \
                 e2fsprogs btrfs-progs xfsprogs f2fs-tools dosfstools
             "
@@ -118,7 +118,7 @@ jobs:
 
       - name: Configure mkinitcpio.conf
         run: |
-          sudo sed -i 's/\bbtrfs\b//' mnt/etc/mkinitcpio.conf
+          [ -f mnt/etc/mkinitcpio.conf ] && sudo sed -i 's/\bbtrfs\b//' mnt/etc/mkinitcpio.conf || true
 
       - name: Configure vconsole.conf
         run: |

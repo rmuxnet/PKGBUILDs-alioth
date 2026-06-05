@@ -1,0 +1,51 @@
+pkgname=device-xiaomi-alioth
+pkgdesc="Package containing configurations for Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth)"
+pkgver=1
+pkgrel=0
+url="https://postmarketos.org"
+license=('MIT')
+arch=('aarch64')
+depends=(
+	'bootmac'
+	'hexagonrpcd'
+	'alioth-kernel-hooks'
+	'linux'
+	'mesa'
+	'mkbootimg'
+	'qbootctl'
+	'iio-sensor-proxy'
+	'swclock-offset'
+)
+source=(
+	'81-libssc-xiaomi-alioth.rules'
+	'xiaomi-alioth.conf'
+	'hifi.conf'
+	'wireplumber.conf'
+)
+sha512sums=(
+	'SKIP'
+	'SKIP'
+	'SKIP'
+	'SKIP'
+)
+
+package() {
+	# Install udev rules
+	install -Dm644 "${srcdir}/81-libssc-xiaomi-alioth.rules" \
+		"${pkgdir}/usr/lib/udev/rules.d/81-libssc-xiaomi-alioth.rules"
+
+	# Install ALSA UCM configuration
+	# Card name is "xiaomi-alioth" from DTS &sound { model = "xiaomi-alioth"; }
+	install -Dm644 "${srcdir}/xiaomi-alioth.conf" \
+		"${pkgdir}/usr/share/alsa/ucm2/conf.d/sm8250/xiaomi-alioth.conf"
+
+	# Install HiFi UCM profile
+	mkdir -p "${pkgdir}/usr/share/alsa/ucm2/Qualcomm/sm8250/"
+	install -Dm644 "${srcdir}/hifi.conf" \
+		"${pkgdir}/usr/share/alsa/ucm2/Qualcomm/sm8250/HiFi_alioth.conf"
+
+	# Install WirePlumber config
+	mkdir -p "${pkgdir}/usr/share/wireplumber/wireplumber.conf.d"
+	install -Dm644 "${srcdir}/wireplumber.conf" \
+		"${pkgdir}/usr/share/wireplumber/wireplumber.conf.d/51-alioth.conf"
+}

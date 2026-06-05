@@ -1,0 +1,134 @@
+# Maintainer: rmux
+
+pkgbase=linux-firmware-alioth
+pkgname=(
+    linux-firmware-alioth-adreno
+    linux-firmware-alioth-adsp
+    linux-firmware-alioth-cdsp
+    linux-firmware-alioth-ipa
+    linux-firmware-alioth-slpi
+    linux-firmware-alioth-venus
+    linux-firmware-alioth-cirrus
+    linux-firmware-alioth-focaltech
+    linux-firmware-alioth-hexagonfs
+)
+
+_commit="95dfcdf6b154c00af3e093db82015cda90f4299a"
+_srcdir="firmware-xiaomi-alioth-$_commit"
+pkgver=20250605
+pkgrel=1
+pkgdesc="Firmware files for Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth)"
+url="https://github.com/N1kroks/firmware-xiaomi-alioth"
+arch=('any')
+license=('custom')
+makedepends=(git)
+options=(!strip !debug)
+
+source=(
+    "$pkgbase-$pkgver.tar.gz::$url/archive/$_commit.tar.gz"
+    "hexagon_firmware.files"
+)
+
+sha512sums=(
+    'SKIP'
+    'SKIP'
+)
+
+_pick() {
+    local p="$1" f d; shift
+    for f; do
+        d="$srcdir/$p/${f#$pkgdir/}"
+        mkdir -p "$(dirname "$d")"
+        mv "$f" "$d"
+        rmdir -p --ignore-fail-on-non-empty "$(dirname "$f")"
+    done
+}
+
+package_linux-firmware-alioth-adreno() {
+    pkgdesc="Xiaomi alioth Adreno firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/qcom/sm8250/xiaomi/alioth/a650_zap.mbn \
+        -t "$pkgdir/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/"
+}
+
+package_linux-firmware-alioth-adsp() {
+    pkgdesc="Xiaomi alioth ADSP firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/qcom/sm8250/xiaomi/alioth/adsp* \
+        -t "$pkgdir/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/"
+}
+
+package_linux-firmware-alioth-cdsp() {
+    pkgdesc="Xiaomi alioth CDSP firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/qcom/sm8250/xiaomi/alioth/cdsp* \
+        -t "$pkgdir/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/"
+}
+
+package_linux-firmware-alioth-ipa() {
+    pkgdesc="Xiaomi alioth IPA firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/qcom/sm8250/xiaomi/alioth/ipa_fws.mbn \
+        -t "$pkgdir/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/"
+}
+
+package_linux-firmware-alioth-slpi() {
+    pkgdesc="Xiaomi alioth SLPI firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/qcom/sm8250/xiaomi/alioth/slpi* \
+        -t "$pkgdir/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/"
+}
+
+package_linux-firmware-alioth-venus() {
+    pkgdesc="Xiaomi alioth Venus (video) firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/qcom/sm8250/xiaomi/alioth/venus.mbn \
+        -t "$pkgdir/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/"
+}
+
+package_linux-firmware-alioth-cirrus() {
+    pkgdesc="Xiaomi alioth Cirrus CS35L41 speaker amplifier firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/cirrus/cs35l41-dsp1-spk-prot-LCV.bin \
+        -t "$pkgdir/usr/lib/firmware/cirrus/"
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/cirrus/cs35l41-dsp1-spk-prot-RCV.bin \
+        -t "$pkgdir/usr/lib/firmware/cirrus/"
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/cirrus/cs35l41-dsp1-spk-prot.wmfw \
+        -t "$pkgdir/usr/lib/firmware/cirrus/"
+}
+
+package_linux-firmware-alioth-focaltech() {
+    pkgdesc="Xiaomi alioth FocalTech touchscreen firmware"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    install -Dm644 "$srcdir/$_srcdir"/lib/firmware/focaltech/fw_ft3658_k11.bin \
+        -t "$pkgdir/usr/lib/firmware/focaltech/"
+}
+
+package_linux-firmware-alioth-hexagonfs() {
+    pkgdesc="Xiaomi alioth hexagonfs (DSP/sensor/acdb) files"
+    depends=('linux-firmware-whence')
+    license=('custom')
+
+    mkdir -p "$pkgdir"
+
+    while IFS="" read -r _i || [ -n "$_i" ]; do
+        [ ! -d $(dirname "$pkgdir/$_i") ] && mkdir -p "$(dirname "$pkgdir/$_i")"
+        install -Dm644 "$srcdir/$_srcdir/$_i" "$pkgdir/$_i"
+    done < "$srcdir/hexagon_firmware.files"
+}

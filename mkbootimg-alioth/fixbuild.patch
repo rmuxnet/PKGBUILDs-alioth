@@ -1,0 +1,13 @@
+diff --git a/libmincrypt/Makefile b/libmincrypt/Makefile
+index 3ef3302..9be1d1a 100755
+--- a/libmincrypt/Makefile
++++ b/libmincrypt/Makefile
+@@ -27,7 +27,7 @@ $(LIB):$(LIB_OBJS)
+ 	$(CP) $@ ..
+
+ %.o:%.c
+-	$(CROSS_COMPILE)$(CC) -o $@ $(CFLAGS) -c $< $(INC) -Werror
++	$(CROSS_COMPILE)$(CC) -o $@ $(CFLAGS) -c $< $(INC) -Werror -Wno-stringop-overflow
+
+ clean:
+ 	$(RM) $(LIB_OBJS) $(LIB)

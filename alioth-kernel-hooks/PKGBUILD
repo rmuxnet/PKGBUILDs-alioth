@@ -1,0 +1,49 @@
+pkgname=alioth-kernel-hooks
+pkgver=1.0
+pkgrel=1
+pkgdesc="Pacman hooks to build and deploy kernel on Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth)"
+arch=("any")
+url=""
+license=("GPL")
+
+depends=(
+	"coreutils"
+	"mkbootimg-alioth"
+	"qbootctl"
+	"linux"
+	"linux-firmware-alioth-adreno"
+	"linux-firmware-alioth-adsp"
+	"linux-firmware-alioth-cdsp"
+	"linux-firmware-alioth-ipa"
+	"linux-firmware-alioth-slpi"
+	"linux-firmware-alioth-venus"
+	"linux-firmware-alioth-cirrus"
+	"linux-firmware-alioth-focaltech"
+	"linux-firmware-alioth-hexagonfs"
+)
+optdepends=(
+  "mkinitcpio: build the initramfs"
+  "linux: default linux preset"
+)
+source=(
+	"91-install-kernel.hook"
+	"flashkernel.sh"
+	"aliothfw-initcpio-hook"
+	"mkinitcpio.conf"
+)
+sha512sums=(
+	'SKIP'
+	'SKIP'
+	'SKIP'
+	'SKIP'
+)
+
+backup=('etc/mkinitcpio.conf.d/alioth.conf')
+
+package() {
+	install -Dm644 "91-install-kernel.hook" \
+		"$pkgdir/usr/share/libalpm/hooks/91-install-kernel.hook"
+	install -Dm755 "flashkernel.sh" "$pkgdir/usr/bin/flashkernel.sh"
+	install -Dm644 "aliothfw-initcpio-hook" "$pkgdir/usr/lib/initcpio/install/aliothfw"
+	install -Dm644 "mkinitcpio.conf" "$pkgdir/etc/mkinitcpio.conf.d/alioth.conf"
+}

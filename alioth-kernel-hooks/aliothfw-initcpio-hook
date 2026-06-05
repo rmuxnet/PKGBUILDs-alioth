@@ -1,0 +1,43 @@
+#!/bin/bash
+
+build() {
+    add_dir "/usr/lib/firmware"
+
+    # Qualcomm SM8250 (Xiaomi alioth)
+    add_file "/usr/lib/firmware/qcom/a650_sqe.fw.zst"
+    add_file "/usr/lib/firmware/qcom/a650_gmu.bin.zst"
+    add_dir "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth"
+
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/a650_zap.mbn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/adspr.jsn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/adspua.jsn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/adsp.mbn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/cdsp.mbn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/cdspr.jsn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/ipa_fws.mbn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/slpi.mbn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/slpir.jsn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/slpius.jsn"
+    add_file "/usr/lib/firmware/qcom/sm8250/xiaomi/alioth/venus.mbn"
+
+    # Cirrus CS35L41 speaker amplifier
+    add_dir "/usr/lib/firmware/cirrus"
+    add_file "/usr/lib/firmware/cirrus/cs35l41-dsp1-spk-prot-LCV.bin"
+    add_file "/usr/lib/firmware/cirrus/cs35l41-dsp1-spk-prot-RCV.bin"
+    add_file "/usr/lib/firmware/cirrus/cs35l41-dsp1-spk-prot.wmfw"
+
+    # QCA (Bluetooth)
+    add_dir "/usr/lib/firmware/qca"
+
+    # ath11k (Wi-Fi)
+    add_dir "/usr/lib/firmware/ath11k"
+}
+
+help() {
+    cat <<HELPEOF
+    Adds firmware specific to Xiaomi alioth (SM8250) to initramfs.
+    Required files: qcom, cirrus, ath11k.
+HELPEOF
+}
+
+# vim:set ft=sh:

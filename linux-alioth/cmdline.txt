@@ -1,0 +1,1 @@
+noquiet loglevel=2 console=tty0 earlycon=tty0 keep_bootcon root=LABEL=armtix rw

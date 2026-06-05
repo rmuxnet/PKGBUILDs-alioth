@@ -1,0 +1,29 @@
+[Trigger]
+Type = Path
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = usr/lib/initcpio/*
+Target = usr/lib/firmware/*
+Target = usr/lib/modules/*/extramodules/
+
+[Trigger]
+Type = Path
+Operation = Install
+Operation = Upgrade
+Target = usr/lib/modules/*/vmlinuz
+Target = boot/cmdline.txt
+
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = mkinitcpio
+Target = mkinitcpio-git
+Target = linux
+
+[Action]
+Description = Generating and Flashing boot.img...
+When = PostTransaction
+Exec = /usr/bin/flashkernel.sh
+NeedsTargets

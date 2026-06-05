@@ -1,0 +1,83 @@
+name: Build boot.img (quick)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bootimg:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+
+    name: build boot.img
+
+    steps:
+      - name: Add alioth repo + update
+        run: |
+          cat >> /etc/pacman.conf << 'EOF'
+
+          [alioth]
+          SigLevel = Optional TrustAll
+          Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
+          EOF
+          pacman -Syu --noconfirm --overwrite '*'
+
+      - name: Install kernel, initramfs tools, firmware
+        run: |
+          # mkinitcpio + kmod first (from ALARM)
+          pacman -S --noconfirm --needed --overwrite '*' mkinitcpio kmod busybox
+          # kernel + device packages from alioth repo (skip dep checks to avoid linux conflict)
+          pacman -S --noconfirm --overwrite '*' --nodeps \
+            linux-alioth-NoLTO \
+            alioth-kernel-hooks \
+            mkbootimg-alioth \
+            linux-firmware-alioth-adreno \
+            linux-firmware-alioth-adsp \
+            linux-firmware-alioth-cdsp \
+            linux-firmware-alioth-ipa \
+            linux-firmware-alioth-slpi \
+            linux-firmware-alioth-venus \
+            linux-firmware-alioth-cirrus \
+            linux-firmware-alioth-focaltech \
+            linux-firmware-alioth-hexagonfs
+
+      - name: Override cmdline (fbcon=rotate:1)
+        run: |
+          printf 'noquiet loglevel=2 console=tty0 earlycon=tty0 keep_bootcon root=LABEL=armtix rw fbcon=rotate:1\n' \
+            > /boot/cmdline.txt
+          cat /boot/cmdline.txt
+
+      - name: Build initramfs (no autodetect)
+        run: |
+          # Remove autodetect so container kernel doesn't strip alioth modules
+          sed -i 's/ autodetect//' /etc/mkinitcpio.conf
+          mkinitcpio -p linux-alioth-NoLTO
+
+      - name: Assemble boot.img
+        run: |
+          cat /boot/Image.gz /boot/dtbs/qcom/sm8250-xiaomi-alioth.dtb > /boot/zImage.gz
+          CMDLINE=$(tr -d '\n' < /boot/cmdline.txt)
+          mkbootimg_alioth \
+            --kernel      /boot/zImage.gz \
+            --ramdisk     /boot/initramfs.img \
+            --cmdline     "$CMDLINE" \
+            --kernel_offset  0x00008000 \
+            --ramdisk_offset 0x01000000 \
+            --second_offset  0x00000000 \
+            --tags_offset    0x00000100 \
+            --header_version 0 \
+            --pagesize    4096 \
+            --hashtype    sha1 \
+            -o /boot/boot.img
+          ls -lh /boot/boot.img
+
+      - name: Upload boot.img
+        uses: actions/upload-artifact@v4
+        with:
+          name: boot-img
+          path: /boot/boot.img
+          if-no-files-found: error

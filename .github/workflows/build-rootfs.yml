@@ -71,7 +71,7 @@ jobs:
               pacman -Sy --noconfirm arch-install-scripts
               cp /bootstrap.conf /etc/pacman.conf
               pacstrap -c /target \
-                base runit-artix elogind \
+                base runit runit-system elogind-runit \
                 dhcpcd haveged openssh ntp nano sudo \
                 e2fsprogs btrfs-progs xfsprogs f2fs-tools dosfstools
             "

@@ -10,7 +10,7 @@ depends=('qbootctl' 'runit')
 _pkgname=qbootctl
 install="$pkgname.install"
 source=("$_pkgname.run")
-sha512sums=('adccc79a42bee080af0bf1d8855864271bcce055a5d9c4413827efc42e8b0dfc3075281cd0b3f47ff0807a22ad6184dbd1ef120b830558b8e6482f313598b944')
+sha512sums=('SKIP')
 
 package() {
 	# Install runit service

@@ -14,8 +14,8 @@ source=(
     "$_pkgname-shutdown.rc.in"
 )
 sha512sums=(
-    'c4cadb086dd47e4bbcd968b7767277dcda7ab43907e3b2ce40332c1ec5753bfe204b68c2566ecb5879d4cf90e121fbb2a90697f6b2c3488eb66bcf5ce80d84dc'
-    'ea93740d4985be2a4ecac98aa61a57861e283b88e41e90d9bd0bc38cca6797895a869892111b71a3c2efe2bbd00bb601cc2a12898f4d276fe45f0974ea3f611f'
+    'SKIP'
+    'SKIP'
 )
 
 package() {

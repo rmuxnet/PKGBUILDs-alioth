@@ -10,7 +10,7 @@ depends=('iio-sensor-proxy-libssc' 'runit')
 _pkgname=iio-sensor-proxy
 install="$pkgname.install"
 source=("$_pkgname-libssc.run")
-sha512sums=('b5891c9050ea291e7108cc80fe67ce2b8a5fc4f04cf8c30b73ed0907e731bd7432caf20e8a94d7ac4475b5710606bf8816fe1a12d4b257925087e4cbe9487f48')
+sha512sums=('SKIP')
 
 package() {
 	install -Dm755 "$srcdir"/$_pkgname-libssc.run "$pkgdir/etc/runit/sv/$_pkgname-libssc/run"

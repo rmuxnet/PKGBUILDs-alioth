@@ -46,6 +46,7 @@ jobs:
       - name: Add ARMtix repos and install build deps
         run: |
           cat >> /etc/pacman.conf << 'EOF'
+
           [armtix]
           SigLevel = Never
           Server = https://repo.armtixlinux.org/armtix/os/$arch
@@ -63,24 +64,27 @@ jobs:
           Server = https://repo.armtixlinux.org/galaxy/os/$arch
           EOF
           pacman -Sy --noconfirm
-          # Install all needed build/runtime deps from repos
-          pacman -S --noconfirm --needed --ask=4 \
-            base-devel git meson ninja \
+          # Install standard packages from ALARM repos (always available)
+          pacman -S --noconfirm --needed \
+            git meson ninja cmake \
             python python-setuptools squashfs-tools \
             bluez bluez-libs bluez-utils \
             libqmi protobuf-c gobject-introspection libqrtr-glib \
             libgudev polkit \
-            nspr nss \
-            runit elogind \
-            linux-headers 2>/dev/null || \
-          pacman -S --noconfirm --needed --ask=4 \
-            base-devel git meson ninja \
-            python python-setuptools squashfs-tools \
-            bluez bluez-libs \
-            libqmi protobuf-c gobject-introspection libqrtr-glib \
-            libgudev polkit \
-            nspr nss \
-            runit elogind || true
+            nspr nss
+          # Install Artix/ARMtix-specific packages
+          pacman -S --noconfirm --needed \
+            runit elogind artix-meson linux-headers 2>/dev/null || \
+          pacman -S --noconfirm --needed \
+            runit elogind linux-headers 2>/dev/null || \
+          pacman -S --noconfirm --needed \
+            runit elogind 2>/dev/null || true
+          # artix-meson wrapper fallback if package unavailable
+          command -v artix-meson &>/dev/null || {
+            printf '#!/bin/bash\nexec meson setup --prefix=/usr --buildtype=plain "$@"\n' \
+              > /usr/local/bin/artix-meson
+            chmod +x /usr/local/bin/artix-meson
+          }
 
       - name: Create unprivileged build user
         run: |

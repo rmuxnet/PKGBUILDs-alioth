@@ -89,11 +89,51 @@ jobs:
           path: linux-alioth/*.pkg.tar.*
           if-no-files-found: error
 
+  build-server-thin:
+    needs: build-thin
+    if: always()
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+
+    name: build (LTO=thin, server)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain & build deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+
+      - name: Create unprivileged build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build (Clang, LTO=thin, server)
+        working-directory: linux-alioth
+        run: |
+          chmod +x build.sh
+          sudo -u builder bash build.sh server-thin
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-server-thin
+          path: linux-alioth/*.pkg.tar.*
+          if-no-files-found: error
+
   publish:
-    needs: [build-none, build-thin]
+    needs: [build-none, build-thin, build-server-thin]
     if: |
       always() &&
-      (needs.build-none.result == 'success' || needs.build-thin.result == 'success')
+      (needs.build-none.result == 'success' || needs.build-thin.result == 'success' || needs.build-server-thin.result == 'success')
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
@@ -116,6 +156,13 @@ jobs:
           path: dist
         continue-on-error: true
 
+      - name: Download server-thin packages
+        uses: actions/download-artifact@v4
+        with:
+          name: pkg-server-thin
+          path: dist
+        continue-on-error: true
+
       - name: Build pacman repo database
         working-directory: dist
         run: |
@@ -130,13 +177,18 @@ jobs:
           tag_name: repo
           name: alioth pacman repo
           body: |
-            Rolling pacman repo for the alioth kernel (Clang: Thin / No LTO).
+            Rolling pacman repo for the alioth kernel (Clang: Thin / No LTO / Server-Thin).
 
             Add to /etc/pacman.conf:
 
               [alioth]
               SigLevel = Optional TrustAll
               Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
+
+            Kernels:
+              linux-alioth-ThinLTO       — normal, interactive (PREEMPT_LAZY, HZ=1000)
+              linux-alioth-Server-ThinLTO — server optimized (PREEMPT_NONE, HZ=250, BBR, NO_HZ_FULL)
+              linux-alioth-NoLTO          — no LTO variant
           files: |
             dist/*.pkg.tar.*
             dist/alioth.db

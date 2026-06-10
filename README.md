@@ -15,7 +15,7 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 | **Names** | Xiaomi POCO F3 / Mi 11i / Redmi K40 |
 | **Codename** | alioth |
 | **SoC** | Qualcomm Snapdragon 870 (SM8250-AC) |
-| **CPU** | 1× Kryo 585 Prime @ 3.19GHz + 3× Gold @ 2.42GHz + 4× Silver @ 1.80GHz |
+| **CPU** | 1× Kryo 585 Prime (stock 3.19GHz, capped at 2.84GHz in DTS) + 3× Gold @ 2.42GHz + 4× Silver @ 1.80GHz |
 | **RAM** | 6 / 8 GB LPDDR5 |
 | **Storage** | 128 / 256 GB UFS 3.1 |
 | **Display** | 6.67″ AMOLED 1080×2400, 120Hz, HDR10+ |
@@ -28,7 +28,7 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 |-----------|--------|-------|
 | Display | ✅ | 90/120Hz, samsung ams667xx01 |
 | Touchscreen | ✅ | focaltech ft3658 via spi4 |
-| GPU | ✅ | Adreno 650 — requires a650 + a650-zap firmware |
+| GPU | ✅ | Adreno 650 — requires a650 + a650-zap firmware; optimized OPP table (683/587/510/400/330/205/150 MHz, explicit voltage levels) |
 | WiFi | ✅ | qca6391 — requires ath11k firmware |
 | Bluetooth | ✅ | qca6391 — requires qca firmware |
 | NFC | ✅ | qcom,nq-nci |
@@ -37,9 +37,9 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 | Flash LED | ✅ | qcom,spmi-flash-led |
 | IR TX | ✅ | |
 | Speaker / earpiece | ✅ | cirrus,cs35l41 (i2c3 @ 0x40/0x41) |
-| Microphones | ❌ | qcom,wcd9380 — no mainline support |
+| Microphones | 🔧 | qcom,wcd9380 — WIP |
 | Sensors (accel/gyro/etc.) | ✅ | hexagonrpcd + libSSC via SDSP remoteproc |
-| Haptics | ❌ | awinic,aw8697 via i2c11 |
+| Haptics | 🔧 | awinic,aw8697 via i2c11 — WIP |
 | GPS | ❌ | |
 | Calls / SMS / Mobile data | ❌ | SDX55m modem not supported in mainline |
 | Camera (main + macro) | ⚠️ | Partial — EEPROM works, sensor drivers WIP |
@@ -65,7 +65,7 @@ Known issue: changing display brightness causes graphical artifacts.
 | `linux-alioth-*-headers` | Headers for each variant |
 | `alioth-kernel-hooks` | Pacman hooks to rebuild initramfs and flash `boot.img` on kernel upgrade |
 
-All variants built with `LLVM=1` (Clang + lld) targeting arm64.
+All variants built with `LLVM=1` (Clang + lld) targeting arm64. Based on Linux 7.0.11 stable ([PipaDB/linux, branch alioth/7.0.11](https://github.com/PipaDB/linux/tree/alioth/7.0.11)) with alioth-specific patches: prime CPU capped at 2.84GHz, optimized Adreno 650 OPP table, hardware video decoding, and other device enablement.
 
 ### Firmware
 
@@ -161,6 +161,15 @@ tar -xf armtix-alioth-runit-YYYYMMDD.tar.xz -C /mnt/
 
 Unlock bootloader first via `fastboot flashing unlock`.
 
+**Before flashing Linux on a slot, erase its dtbo partition:**
+
+```sh
+fastboot erase dtbo_a   # if flashing slot a
+fastboot erase dtbo_b   # if flashing slot b
+```
+
+Android's dtbo overlays conflict with the mainline DTS and will prevent the device from booting correctly if left in place.
+
 ---
 
 ## Build locally
@@ -198,7 +207,7 @@ UART TX is below the sub-board connector on the left side of the board, next to 
 
 ## Links
 
-- [Mainline kernel source (N1kroks/alioth)](https://github.com/mainlining/linux/tree/nikroks/alioth)
+- [Kernel source (PipaDB/linux, branch alioth/7.0.11)](https://github.com/PipaDB/linux/tree/alioth/7.0.11)
 - [Firmware repo](https://github.com/N1kroks/firmware-xiaomi-alioth)
 - [PostmarketOS device page](https://wiki.postmarketos.org/wiki/Xiaomi_POCO_F3_(xiaomi-alioth))
 - [ARMtix Linux](https://armtixlinux.org/)

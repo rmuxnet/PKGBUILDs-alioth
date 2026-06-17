@@ -69,7 +69,6 @@ sed -i "/> \.\/\.config/a\\
   make LLVM=1 ARCH=arm64 olddefconfig\\
 \\
   echo \"Battery: ${BATTERY}mAh (${BAT_UAH} uAh)\"\\
-  echo \"${BAT_SUFFIX}\" > localversion.30-battery\\
   patch -p1 < \"\${srcdir}/0001-battery-5k.patch\"" "$PB"
 
 # For 4520 (stock), revert the patch values back after applying

@@ -24,16 +24,14 @@ sha512sums=('SKIP'
             'SKIP'
             'SKIP')
 
+# battery patch is applied by build.sh based on BATTERY= env var (5000 or 4520)
+
 prepare() {
   cd $_srcname
 
   echo "Setting version..."
   echo "-$pkgrel" > localversion.10-pkgrel
-  echo "${pkgbase#linux}" > localversion.20-pkgname
-  echo "-5k" > localversion.30-battery
-
-  echo "Patching battery capacity to 5000mAh..."
-  patch -p1 < "${srcdir}/0001-battery-5k.patch"
+  echo "${pkgbase#linux-alioth}" > localversion.20-pkgname
 
   cat "${srcdir}/$_config" > ./.config
   make olddefconfig

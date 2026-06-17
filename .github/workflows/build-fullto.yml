@@ -1,4 +1,4 @@
-name: Build alioth kernel (Clang LTO) + pacman repo
+name: Build alioth kernel (Clang ThinLTO) + pacman repo
 
 on:
   workflow_dispatch:
@@ -11,156 +11,145 @@ permissions:
   contents: write
 
 jobs:
-  build-none:
+  build-thin-5k:
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
-
-    name: build (LTO=none)
-
+    name: ThinLTO · 5000mAh
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install toolchain & build deps
+      - uses: actions/checkout@v4
+      - name: Install deps
         run: |
           pacman -Syu --noconfirm --needed \
             base-devel git clang llvm lld \
             xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
             python pahole
-
-      - name: Create unprivileged build user
+      - name: Create build user
         run: |
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
           chown -R builder:builder "$GITHUB_WORKSPACE"
-
-      - name: Build (Clang, LTO=none)
+      - name: Build
         working-directory: linux-alioth
-        run: |
-          chmod +x build.sh
-          sudo -u builder bash build.sh none
-
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
+        run: sudo -u builder env BATTERY=5000 bash build.sh thin
+      - uses: actions/upload-artifact@v4
         with:
-          name: pkg-none
+          name: pkg-thin-5k
           path: linux-alioth/*.pkg.tar.*
           if-no-files-found: error
 
-  build-thin:
-    needs: build-none
-    if: always()
+  build-thin-4p52k:
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
-
-    name: build (LTO=thin)
-
+    name: ThinLTO · 4520mAh (stock)
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install toolchain & build deps
+      - uses: actions/checkout@v4
+      - name: Install deps
         run: |
           pacman -Syu --noconfirm --needed \
             base-devel git clang llvm lld \
             xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
             python pahole
-
-      - name: Create unprivileged build user
+      - name: Create build user
         run: |
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
           chown -R builder:builder "$GITHUB_WORKSPACE"
-
-      - name: Build (Clang, LTO=thin)
+      - name: Build
         working-directory: linux-alioth
-        run: |
-          chmod +x build.sh
-          sudo -u builder bash build.sh thin
-
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
+        run: sudo -u builder env BATTERY=4520 bash build.sh thin
+      - uses: actions/upload-artifact@v4
         with:
-          name: pkg-thin
+          name: pkg-thin-4p52k
           path: linux-alioth/*.pkg.tar.*
           if-no-files-found: error
 
-  build-server-thin:
-    needs: build-thin
-    if: always()
+  build-server-thin-5k:
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
-
-    name: build (LTO=thin, server)
-
+    name: Server-ThinLTO · 5000mAh
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install toolchain & build deps
+      - uses: actions/checkout@v4
+      - name: Install deps
         run: |
           pacman -Syu --noconfirm --needed \
             base-devel git clang llvm lld \
             xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
             python pahole
-
-      - name: Create unprivileged build user
+      - name: Create build user
         run: |
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
           chown -R builder:builder "$GITHUB_WORKSPACE"
-
-      - name: Build (Clang, LTO=thin, server)
+      - name: Build
         working-directory: linux-alioth
-        run: |
-          chmod +x build.sh
-          sudo -u builder bash build.sh server-thin
-
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
+        run: sudo -u builder env BATTERY=5000 bash build.sh server-thin
+      - uses: actions/upload-artifact@v4
         with:
-          name: pkg-server-thin
+          name: pkg-server-thin-5k
+          path: linux-alioth/*.pkg.tar.*
+          if-no-files-found: error
+
+  build-server-thin-4p52k:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+    name: Server-ThinLTO · 4520mAh (stock)
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+      - name: Create build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Build
+        working-directory: linux-alioth
+        run: sudo -u builder env BATTERY=4520 bash build.sh server-thin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pkg-server-thin-4p52k
           path: linux-alioth/*.pkg.tar.*
           if-no-files-found: error
 
   publish:
-    needs: [build-none, build-thin, build-server-thin]
+    needs: [build-thin-5k, build-thin-4p52k, build-server-thin-5k, build-server-thin-4p52k]
     if: |
-      always() &&
-      (needs.build-none.result == 'success' || needs.build-thin.result == 'success' || needs.build-server-thin.result == 'success')
+      always() && (
+        needs.build-thin-5k.result == 'success' ||
+        needs.build-thin-4p52k.result == 'success' ||
+        needs.build-server-thin-5k.result == 'success' ||
+        needs.build-server-thin-4p52k.result == 'success'
+      )
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
-
     steps:
       - name: Install repo tools
         run: pacman -Syu --noconfirm --needed pacman
 
-      - name: Download none packages
-        uses: actions/download-artifact@v4
-        with:
-          name: pkg-none
-          path: dist
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-thin-5k,           path: dist }
         continue-on-error: true
-
-      - name: Download thin packages
-        uses: actions/download-artifact@v4
-        with:
-          name: pkg-thin
-          path: dist
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-thin-4p52k,        path: dist }
         continue-on-error: true
-
-      - name: Download server-thin packages
-        uses: actions/download-artifact@v4
-        with:
-          name: pkg-server-thin
-          path: dist
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-server-thin-5k,    path: dist }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-server-thin-4p52k, path: dist }
         continue-on-error: true
 
       - name: Build pacman repo database
@@ -171,13 +160,13 @@ jobs:
           cp -f alioth.db.tar.zst    alioth.db
           cp -f alioth.files.tar.zst alioth.files
 
-      - name: Publish repo to GitHub Release
+      - name: Publish to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: repo
           name: alioth pacman repo
           body: |
-            Rolling pacman repo for the alioth kernel (Clang: Thin / No LTO / Server-Thin).
+            Rolling pacman repo for the alioth kernel.
 
             Add to /etc/pacman.conf:
 
@@ -186,9 +175,10 @@ jobs:
               Server = https://github.com/rmuxnet/PKGBUILDs-alioth/releases/download/repo
 
             Kernels:
-              linux-alioth-ThinLTO       — normal, interactive (PREEMPT_LAZY, HZ=1000)
-              linux-alioth-Server-ThinLTO — server optimized (PREEMPT_NONE, HZ=250, BBR, NO_HZ_FULL)
-              linux-alioth-NoLTO          — no LTO variant
+              linux-alioth-ThinLTO-5k            — interactive, 5000mAh battery
+              linux-alioth-ThinLTO-4p52k         — interactive, stock 4520mAh battery
+              linux-alioth-Server-ThinLTO-5k     — server (PREEMPT_NONE, HZ=250, BBR), 5000mAh
+              linux-alioth-Server-ThinLTO-4p52k  — server, stock 4520mAh battery
           files: |
             dist/*.pkg.tar.*
             dist/alioth.db

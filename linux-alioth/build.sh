@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# build.sh [full|thin|none|server-thin|server-full] - Clang build of linux-alioth
+# build.sh [thin|server-thin] - Clang ThinLTO build of linux-alioth
 #
-#   full          Full LTO          -> linux-alioth-FullLTO
-#   thin          ThinLTO           -> linux-alioth-ThinLTO
-#   none          no LTO            -> linux-alioth-NoLTO   (still Clang)
-#   server-thin   ThinLTO, server   -> linux-alioth-Server-ThinLTO
-#   server-full   Full LTO, server  -> linux-alioth-Server-FullLTO
+#   thin          ThinLTO           -> linux-alioth-ThinLTO-{5k|4p52k}
+#   server-thin   ThinLTO, server   -> linux-alioth-Server-ThinLTO-{5k|4p52k}
+#
+# Battery variant (env var, default 5000):
+#   BATTERY=5000   5000mAh aftermarket  -> suffix -5k
+#   BATTERY=4520   stock 4520mAh        -> suffix -4p52k
 #
 # Server config vs normal:
 #   - PREEMPT_NONE   (no preemption, max throughput)
@@ -22,15 +23,20 @@
 
 set -euo pipefail
 
-MODE="${1:-full}"
+MODE="${1:-thin}"
+BATTERY="${BATTERY:-5000}"
 SERVER=0
+
 case "$MODE" in
-	full)         SUFFIX="-FullLTO";        LTO_CFG="-d LTO_NONE -e LTO_CLANG_FULL" ;;
 	thin)         SUFFIX="-ThinLTO";        LTO_CFG="-d LTO_NONE -e LTO_CLANG_THIN" ;;
-	none)         SUFFIX="-NoLTO";          LTO_CFG="-e LTO_NONE" ;;
 	server-thin)  SUFFIX="-Server-ThinLTO"; LTO_CFG="-d LTO_NONE -e LTO_CLANG_THIN"; SERVER=1 ;;
-	server-full)  SUFFIX="-Server-FullLTO"; LTO_CFG="-d LTO_NONE -e LTO_CLANG_FULL"; SERVER=1 ;;
-	*) echo "usage: $0 {full|thin|none|server-thin|server-full}" >&2; exit 1 ;;
+	*) echo "usage: $0 {thin|server-thin}" >&2; exit 1 ;;
+esac
+
+case "$BATTERY" in
+	5000) BAT_UAH=5000000; BAT_UWH=19000000; BAT_SUFFIX="-5k" ;;
+	4520) BAT_UAH=4520000; BAT_UWH=17500000; BAT_SUFFIX="-4p52k" ;;
+	*) echo "error: BATTERY must be 5000 or 4520" >&2; exit 1 ;;
 esac
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -41,25 +47,37 @@ if [[ $EUID -eq 0 ]]; then
 	exit 1
 fi
 
-for t in clang ld.lld llvm-ar makepkg; do
+for t in clang ld.lld llvm-ar makepkg patch; do
 	command -v "$t" >/dev/null || { echo "error: missing $t" >&2; exit 1; }
 done
 
 export LLVM=1
 export ARCH=arm64
 
-PB="PKGBUILD.${MODE}"
+FULL_SUFFIX="${SUFFIX}${BAT_SUFFIX}"
+PB="PKGBUILD.${MODE}.${BATTERY}"
 cp PKGBUILD "$PB"
 trap 'rm -f "$PB"' EXIT
 
-sed -i "s/^pkgbase=linux-alioth\$/pkgbase=linux-alioth${SUFFIX}/" "$PB"
+sed -i "s/^pkgbase=linux-alioth\$/pkgbase=linux-alioth${FULL_SUFFIX}/" "$PB"
 
-# Inject LTO config + olddefconfig after base config is loaded
+# Inject LTO config + battery localversion + optional patch into prepare()
 sed -i "/> \.\/\.config/a\\
 \\
   echo \"Configuring LTO mode: ${MODE}\"\\
   scripts/config --file ./.config ${LTO_CFG}\\
-  make LLVM=1 ARCH=arm64 olddefconfig" "$PB"
+  make LLVM=1 ARCH=arm64 olddefconfig\\
+\\
+  echo \"Battery: ${BATTERY}mAh (${BAT_UAH} uAh)\"\\
+  echo \"${BAT_SUFFIX}\" > localversion.30-battery\\
+  patch -p1 < \"\${srcdir}/0001-battery-5k.patch\"" "$PB"
+
+# For 4520 (stock), revert the patch values back after applying
+if [[ "$BATTERY" == "4520" ]]; then
+	sed -i "/patch -p1.*battery-5k/a\\
+  sed -i 's/charge-full-design-microamp-hours = <5000000>/charge-full-design-microamp-hours = <4520000>/' arch/arm64/boot/dts/qcom/sm8250-xiaomi-alioth.dts\\
+  sed -i 's/energy-full-design-microwatt-hours = <19000000>/energy-full-design-microwatt-hours = <17500000>/' arch/arm64/boot/dts/qcom/sm8250-xiaomi-alioth.dts" "$PB"
+fi
 
 # Inject server-specific config AFTER LTO olddefconfig so it wins
 if [[ $SERVER -eq 1 ]]; then
@@ -79,8 +97,7 @@ if [[ $SERVER -eq 1 ]]; then
   echo \"Server config applied: HZ=250 PREEMPT_NONE BBR NO_HZ_FULL\"" "$PB"
 fi
 
-echo ">> Building Clang package: linux-alioth${SUFFIX} (LTO=${MODE}, server=${SERVER})"
-[[ "$MODE" == server-full || "$MODE" == full ]] && echo ">> note: Full LTO link is slow + RAM-hungry"
+echo ">> Building: linux-alioth${FULL_SUFFIX} (LTO=${MODE}, battery=${BATTERY}mAh)"
 makepkg -p "$PB" -f --noconfirm
 
 echo

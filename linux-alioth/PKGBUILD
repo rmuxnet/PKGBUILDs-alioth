@@ -16,8 +16,10 @@ _config="config-qcom-sm8250-alioth.aarch64"
 source=("$url/archive/refs/heads/$_branch.tar.gz"
         'config-qcom-sm8250-alioth.aarch64'
         'linux-alioth.preset'
-        'cmdline.txt')
+        'cmdline.txt'
+        '0001-battery-5k.patch')
 sha512sums=('SKIP'
+            'SKIP'
             'SKIP'
             'SKIP'
             'SKIP')
@@ -28,6 +30,10 @@ prepare() {
   echo "Setting version..."
   echo "-$pkgrel" > localversion.10-pkgrel
   echo "${pkgbase#linux}" > localversion.20-pkgname
+  echo "-5k" > localversion.30-battery
+
+  echo "Patching battery capacity to 5000mAh..."
+  patch -p1 < "${srcdir}/0001-battery-5k.patch"
 
   cat "${srcdir}/$_config" > ./.config
   make olddefconfig

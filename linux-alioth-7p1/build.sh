@@ -59,7 +59,7 @@ PB="PKGBUILD.${MODE}.${BATTERY}"
 cp PKGBUILD "$PB"
 trap 'rm -f "$PB"' EXIT
 
-sed -i "s/^pkgbase=linux-alioth\$/pkgbase=linux-alioth${FULL_SUFFIX}/" "$PB"
+sed -i "s/^pkgbase=linux-alioth-7p1\$/pkgbase=linux-alioth-7p1${FULL_SUFFIX}/" "$PB"
 
 # Inject LTO config + battery localversion + optional patch into prepare()
 sed -i "/> \.\/\.config/a\\

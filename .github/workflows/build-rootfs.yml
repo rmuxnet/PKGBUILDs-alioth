@@ -161,8 +161,8 @@ jobs:
         run: |
           sudo arch-chroot mnt/ pacman -S --noconfirm --needed \
             base-devel \
-            linux-alioth-NoLTO \
-            linux-alioth-NoLTO-headers \
+            linux-alioth-7p1-ThinLTO-4p52k \
+            linux-alioth-7p1-ThinLTO-4p52k-headers \
             device-xiaomi-alioth \
             device-xiaomi-alioth-runit \
             linux-firmware-alioth-adreno \
@@ -241,7 +241,7 @@ jobs:
           body: |
             Armtix Alioth rootfs (runit) built on ${{ steps.meta.outputs.date }}.
 
-            Base: ARMtix runit (pacstrap) + linux-alioth 7.0.11
+            Base: ARMtix runit (pacstrap) + linux-alioth-7p1 7.1
 
             **Install:**
             1. Flash `*-boot.img` to boot partition via fastboot or dd

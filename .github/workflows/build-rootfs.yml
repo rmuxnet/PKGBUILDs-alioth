@@ -157,6 +157,11 @@ jobs:
           EOF
           sudo arch-chroot mnt/ pacman -Sy --noconfirm
 
+      - name: Prepare runit /run for package hooks
+        run: |
+          sudo mkdir -p mnt/run/runit
+          sudo ln -sfn /etc/runit/runsvdir/current mnt/run/runit/service
+
       - name: Install device packages
         run: |
           sudo arch-chroot mnt/ pacman -S --noconfirm --needed \

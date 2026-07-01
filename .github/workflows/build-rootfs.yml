@@ -235,8 +235,6 @@ jobs:
           DATE=${{ steps.meta.outputs.date }}
           tar -I 'xz -9e -T0' -cf armtix-alioth-runit-${DATE}.tar.xz \
             armtix-alioth-runit-${DATE}.img
-          tar -I 'zstd --ultra -22 --long -T0' -cf armtix-alioth-runit-${DATE}.tar.zst \
-            armtix-alioth-runit-${DATE}.img
 
       - name: Publish to GitHub Release
         uses: softprops/action-gh-release@v2
@@ -250,10 +248,9 @@ jobs:
 
             **Install:**
             1. Flash `*-boot.img` to boot partition via fastboot or dd
-            2. Extract `*.tar.xz` or `*.tar.zst` to your armtix partition (labeled `armtix`)
+            2. Extract `*.tar.xz` to your armtix partition (labeled `armtix`)
 
             Default login — user: `armtix`, password: `armtix`, root password: `armtix`
           files: |
             armtix-alioth-runit-${{ steps.meta.outputs.date }}.tar.xz
-            armtix-alioth-runit-${{ steps.meta.outputs.date }}.tar.zst
             artifacts/armtix-alioth-runit-${{ steps.meta.outputs.date }}-boot.img

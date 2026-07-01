@@ -125,13 +125,13 @@ jobs:
           path: linux-alioth/*.pkg.tar.*
           if-no-files-found: error
 
-  # ── 7.1 builds ─────────────────────────────────────────────────────────────
+  # ── 7.1.2 builds ──────────────────────────────────────────────────────────
   build-7p1-thin-5k:
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
-    name: 7.1 · ThinLTO · 5000mAh
+    name: 7.1.2 · ThinLTO · 5000mAh
     steps:
       - uses: actions/checkout@v4
       - name: Install deps
@@ -159,7 +159,7 @@ jobs:
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
-    name: 7.1 · ThinLTO · 4520mAh
+    name: 7.1.2 · ThinLTO · 4520mAh
     steps:
       - uses: actions/checkout@v4
       - name: Install deps
@@ -187,7 +187,7 @@ jobs:
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
-    name: 7.1 · Server-ThinLTO · 5000mAh
+    name: 7.1.2 · Server-ThinLTO · 5000mAh
     steps:
       - uses: actions/checkout@v4
       - name: Install deps
@@ -215,7 +215,7 @@ jobs:
     container:
       image: menci/archlinuxarm:base-devel
       options: --privileged
-    name: 7.1 · Server-ThinLTO · 4520mAh
+    name: 7.1.2 · Server-ThinLTO · 4520mAh
     steps:
       - uses: actions/checkout@v4
       - name: Install deps
@@ -318,7 +318,7 @@ jobs:
               linux-alioth-Server-ThinLTO-5k     — server (PREEMPT_NONE, HZ=250, BBR), 5000mAh
               linux-alioth-Server-ThinLTO-4p52k  — server, stock 4520mAh battery
 
-            Kernels (7.1):
+            Kernels (7.1.2):
               linux-alioth-7p1-ThinLTO-5k            — interactive, 5000mAh battery
               linux-alioth-7p1-ThinLTO-4p52k         — interactive, stock 4520mAh battery
               linux-alioth-7p1-Server-ThinLTO-5k     — server (PREEMPT_NONE, HZ=250, BBR), 5000mAh

@@ -57,15 +57,14 @@ Known issue: changing display brightness causes graphical artifacts.
 
 | Package | Description |
 |---------|-------------|
-| `linux-alioth-NoLTO` | Kernel 7.0.11, Clang, no LTO |
-| `linux-alioth-ThinLTO` | Kernel 7.0.11, Clang ThinLTO — recommended for desktop/server use |
-| `linux-alioth-FullLTO` | Kernel 7.0.11, Clang full LTO |
-| `linux-alioth-Server-ThinLTO` | Server variant: PREEMPT_NONE, HZ=250, full tickless, BBR, RCU offload |
-| `linux-alioth-Server-FullLTO` | Same with full LTO |
-| `linux-alioth-*-headers` | Headers for each variant |
+| `linux-alioth-7p1-ThinLTO-5k` | Kernel 7.1.2, Clang ThinLTO, 5000mAh battery — recommended for desktop/server use |
+| `linux-alioth-7p1-ThinLTO-4p52k` | Same, stock 4520mAh battery |
+| `linux-alioth-7p1-Server-ThinLTO-5k` | Server variant: PREEMPT_NONE, HZ=250, full tickless, BBR, RCU offload, 5000mAh battery |
+| `linux-alioth-7p1-Server-ThinLTO-4p52k` | Same, stock 4520mAh battery |
+| `linux-alioth-7p1-*-headers` | Headers for each variant |
 | `alioth-kernel-hooks` | Pacman hooks to rebuild initramfs and flash `boot.img` on kernel upgrade |
 
-All variants built with `LLVM=1` (Clang + lld) targeting arm64. Based on Linux 7.0.11 stable ([PipaDB/linux, branch alioth/7.0.11](https://github.com/PipaDB/linux/tree/alioth/7.0.11)) with alioth-specific patches: prime CPU capped at 2.84GHz, optimized Adreno 650 OPP table, hardware video decoding, and other device enablement.
+All variants built with `LLVM=1` (Clang + lld) targeting arm64. Based on Linux 7.1.2 stable ([rmuxnet/linux, branch alioth/7.1.2](https://github.com/rmuxnet/linux/tree/alioth/7.1.2)) with alioth-specific patches: prime CPU capped at 2.84GHz, optimized Adreno 650 OPP table, hardware video decoding, and other device enablement.
 
 ### Firmware
 
@@ -123,7 +122,7 @@ Then:
 
 ```sh
 pacman -Sy
-pacman -S linux-alioth-NoLTO device-xiaomi-alioth device-xiaomi-alioth-runit
+pacman -S linux-alioth-7p1-Server-ThinLTO-5k device-xiaomi-alioth device-xiaomi-alioth-runit
 ```
 
 ---
@@ -176,9 +175,8 @@ Android's dtbo overlays conflict with the mainline DTS and will prevent the devi
 
 ```sh
 git clone https://github.com/rmuxnet/PKGBUILDs-alioth
-cd PKGBUILDs-alioth/linux-alioth
+cd PKGBUILDs-alioth/linux-alioth-7p1
 bash build.sh thin        # ThinLTO
-bash build.sh none        # no LTO (fastest build)
 bash build.sh server-thin # server-optimised ThinLTO
 ```
 
@@ -190,7 +188,7 @@ Requires Clang, lld, and standard kernel build deps. Must not run as root.
 
 | Workflow | Trigger | Output |
 |----------|---------|--------|
-| `build-fullto.yml` | push to `linux-alioth/**`, manual | All kernel variants → `repo` release |
+| `build-fullto.yml` | push to `linux-alioth-7p1/**`, manual | All kernel variants → `repo` release |
 | `build-packages.yml` | push to any non-kernel package, manual | Extra packages → `repo` release |
 | `build-bootimg.yml` | manual | `boot.img` artifact (quick, no full kernel build) |
 | `build-rootfs.yml` | manual | Full rootfs tarball + boot.img → versioned release |
@@ -207,7 +205,7 @@ UART TX is below the sub-board connector on the left side of the board, next to 
 
 ## Links
 
-- [Kernel source (PipaDB/linux, branch alioth/7.0.11)](https://github.com/PipaDB/linux/tree/alioth/7.0.11)
+- [Kernel source (rmuxnet/linux, branch alioth/7.1.2)](https://github.com/rmuxnet/linux/tree/alioth/7.1.2)
 - [Firmware repo](https://github.com/N1kroks/firmware-xiaomi-alioth)
 - [PostmarketOS device page](https://wiki.postmarketos.org/wiki/Xiaomi_POCO_F3_(xiaomi-alioth))
 - [ARMtix Linux](https://armtixlinux.org/)

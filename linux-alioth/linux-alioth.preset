@@ -1,7 +1,0 @@
-# mkinitcpio preset file for the '%PKGBASE%' package
-
-ALL_kver="%KERNVER%"
-
-PRESETS=('default')
-
-default_image="/boot/initramfs.img"

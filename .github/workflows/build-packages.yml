@@ -67,7 +67,7 @@ jobs:
           # Install standard packages from ALARM repos (always available)
           pacman -S --noconfirm --needed --overwrite '*' \
             git meson ninja cmake cython \
-            python python-setuptools squashfs-tools \
+            python python-setuptools python-build python-installer python-wheel squashfs-tools \
             bluez bluez-libs bluez-utils \
             libqmi protobuf-c gobject-introspection libqrtr-glib \
             libgudev polkit \

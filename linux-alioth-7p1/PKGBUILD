@@ -1,14 +1,14 @@
 buildarch=8
 
 pkgbase=linux-alioth-7p1
-_branch="alioth/7.1"
-_srcname="linux-alioth-7.1"
+_branch="alioth/7.1.2"
+_srcname="linux-alioth-7.1.2"
 _kernelname=${pkgbase#linux}
 _desc="Kernel for Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth)"
-pkgver=7.1
+pkgver=7.1.2
 pkgrel=1
 arch=('aarch64')
-url="https://github.com/PipaDB/linux"
+url="https://github.com/rmuxnet/linux"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'uboot-tools' 'dtc')
 options=('!strip')

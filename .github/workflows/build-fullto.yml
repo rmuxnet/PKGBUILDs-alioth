@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'linux-alioth-7p1/**'
+      - 'linux-alioth-7p7/**'
 
 permissions:
   contents: write
@@ -124,6 +125,118 @@ jobs:
           path: linux-alioth-7p1/*.pkg.tar.*
           if-no-files-found: error
 
+  build-7p7-thin-5k:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+    name: 7.1.7 · ThinLTO · 5000mAh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+      - name: Create build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Build
+        working-directory: linux-alioth-7p7
+        run: sudo -u builder env BATTERY=5000 bash build.sh thin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pkg-7p7-thin-5k
+          path: linux-alioth-7p7/*.pkg.tar.*
+          if-no-files-found: error
+
+  build-7p7-thin-4p52k:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+    name: 7.1.7 · ThinLTO · 4520mAh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+      - name: Create build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Build
+        working-directory: linux-alioth-7p7
+        run: sudo -u builder env BATTERY=4520 bash build.sh thin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pkg-7p7-thin-4p52k
+          path: linux-alioth-7p7/*.pkg.tar.*
+          if-no-files-found: error
+
+  build-7p7-server-thin-5k:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+    name: 7.1.7 · Server-ThinLTO · 5000mAh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+      - name: Create build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Build
+        working-directory: linux-alioth-7p7
+        run: sudo -u builder env BATTERY=5000 bash build.sh server-thin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pkg-7p7-server-thin-5k
+          path: linux-alioth-7p7/*.pkg.tar.*
+          if-no-files-found: error
+
+  build-7p7-server-thin-4p52k:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+    name: 7.1.7 · Server-ThinLTO · 4520mAh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git clang llvm lld \
+            xmlto docbook-xsl kmod inetutils bc uboot-tools dtc \
+            python pahole
+      - name: Create build user
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Build
+        working-directory: linux-alioth-7p7
+        run: sudo -u builder env BATTERY=4520 bash build.sh server-thin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pkg-7p7-server-thin-4p52k
+          path: linux-alioth-7p7/*.pkg.tar.*
+          if-no-files-found: error
+
   # ── publish ─────────────────────────────────────────────────────────────────
   publish:
     needs:
@@ -131,11 +244,19 @@ jobs:
       - build-7p1-thin-4p52k
       - build-7p1-server-thin-5k
       - build-7p1-server-thin-4p52k
+      - build-7p7-thin-5k
+      - build-7p7-thin-4p52k
+      - build-7p7-server-thin-5k
+      - build-7p7-server-thin-4p52k
     if: always() && (
       needs.build-7p1-thin-5k.result == 'success' ||
       needs.build-7p1-thin-4p52k.result == 'success' ||
       needs.build-7p1-server-thin-5k.result == 'success' ||
-      needs.build-7p1-server-thin-4p52k.result == 'success')
+      needs.build-7p1-server-thin-4p52k.result == 'success' ||
+      needs.build-7p7-thin-5k.result == 'success' ||
+      needs.build-7p7-thin-4p52k.result == 'success' ||
+      needs.build-7p7-server-thin-5k.result == 'success' ||
+      needs.build-7p7-server-thin-4p52k.result == 'success')
     runs-on: ubuntu-24.04-arm
     container:
       image: menci/archlinuxarm:base-devel
@@ -154,6 +275,18 @@ jobs:
         continue-on-error: true
       - uses: actions/download-artifact@v4
         with: { name: pkg-7p1-server-thin-4p52k, path: dist }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-7p7-thin-5k,          path: dist }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-7p7-thin-4p52k,       path: dist }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-7p7-server-thin-5k,   path: dist }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: pkg-7p7-server-thin-4p52k, path: dist }
         continue-on-error: true
 
       - name: Build pacman repo database
@@ -183,6 +316,12 @@ jobs:
               linux-alioth-7p1-ThinLTO-4p52k         — interactive, stock 4520mAh battery
               linux-alioth-7p1-Server-ThinLTO-5k     — server (PREEMPT_NONE, HZ=250, BBR), 5000mAh
               linux-alioth-7p1-Server-ThinLTO-4p52k  — server, stock 4520mAh battery
+
+            Kernels (7.1.7):
+              linux-alioth-7p7-ThinLTO-5k            — interactive, 5000mAh battery
+              linux-alioth-7p7-ThinLTO-4p52k         — interactive, stock 4520mAh battery
+              linux-alioth-7p7-Server-ThinLTO-5k     — server (PREEMPT_NONE, HZ=250, BBR), 5000mAh
+              linux-alioth-7p7-Server-ThinLTO-4p52k  — server, stock 4520mAh battery
           files: |
             dist/*.pkg.tar.*
             dist/alioth.db

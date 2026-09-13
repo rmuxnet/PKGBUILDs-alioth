@@ -33,11 +33,11 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 | USB OTG | OK | pm8150b USB-C controller |
 | Battery | OK | qcom,pm8150b-fg |
 | Flash LED | OK | qcom,spmi-flash-led |
-| IR TX | OK | |
-| Speaker / earpiece | OK | cirrus,cs35l41 (i2c3 @ 0x40/0x41) |
-| Microphones | WIP | qcom,wcd9380 |
+| IR TX | OK | ir-spi-led on spi2. Tested with `ir-ctl`. Send NEC codes with `ir-ctl -S nec:0xff00`. |
+| Speaker / earpiece | WIP | cirrus,cs35l41 on i2c3 at 0x40 and 0x41. The ADSP rejects the TERT TDM port start (port 38). The WCD capture path is under investigation. |
+| Microphones | WIP | qcom,wcd9380. The codec enumerates over soundwire. The mixer tree and the UCM route work. Capture streams for 1 second, then the ADC powers down. Audio routing was added. A vamacro clock retry patch waits for the next kernel build. |
 | Sensors (accel/gyro/etc.) | OK | hexagonrpcd + libSSC via SDSP remoteproc |
-| Haptics | WIP | awinic,aw8697 via i2c11 |
+| Haptics | OK | awinic,aw8697 on i2c11 at 0x5a. The vendor driver was ported to 7.1.7 APIs. Play effects with the sysfs attributes `index` and `activate`. |
 | GPS | N/A | |
 | Calls / SMS / Mobile data | N/A | SDX55m modem not supported in mainline |
 | Camera (main + macro) | Partial | EEPROM works, sensor drivers WIP |

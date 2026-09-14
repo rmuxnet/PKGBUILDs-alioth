@@ -44,7 +44,7 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
         </tr>
         <tr>
             <td>Memory</td>
-            <td>128GB 6GB RAM, 128GB 8GB RAM, 256GB 8GB RAM, 256GB 12GB RAM</td>
+            <td>128GB 6GB RAM, 128GB 8GB RAM, 256GB 8GB RAM</td>
             <td>128GB 6GB RAM, 128GB 8GB RAM, 256GB 8GB RAM</td>
             <td>128GB 6GB RAM, 128GB 8GB RAM</td>
         </tr>

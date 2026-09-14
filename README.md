@@ -30,9 +30,9 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 | WiFi | OK | qca6391 (ath11k reports QCA6390 hw2.0) - requires ath11k firmware |
 | Bluetooth | Partial | qca6391 - requires qca firmware. hci0 comes up. bluetoothd is not set up and the MAC address is random. Pairing is not tested. |
 | NFC | Untested | nxp,pn553 on i2c1 at 0x28 (nxp-nci driver). The nfc0 device is present. Tag reads are not tested. |
-| USB OTG | Partial | pm8150b USB-C controller. Device mode and role switch are present. Host mode is not tested. |
+| USB OTG | OK | pm8150b USB-C controller. Host mode tested with a USB hub. |
 | Battery | Partial | PMIC fuel gauge qcom,pm8150b-fg. Charging works from a computer USB port (5 V). A USB PD wall charger does not charge. No fast charge. |
-| Flash LED | Untested | qcom,spmi-flash-led registers `white:flash`. The LED is not tested. |
+| Flash LED | OK | qcom,spmi-flash-led, LED class device `white:flash` |
 | IR TX | OK | ir-spi-led on spi2. Tested with `ir-ctl`. Send NEC codes with `ir-ctl -S nec:0xff00`. |
 | Speaker / earpiece | Not working | cirrus,cs35l41 on i2c3 at 0x40 and 0x41. The amplifiers probe. There is no speaker output. |
 | Microphones | Not working | qcom,wcd9380. The codec is not enabled in the device tree. |

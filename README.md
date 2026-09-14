@@ -29,12 +29,12 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 | GPU | OK | Adreno 650 - requires a650 + a650-zap firmware; optimized OPP table (683/587/510/400/330/205/150 MHz, explicit voltage levels) |
 | WiFi | OK | qca6391 (ath11k reports QCA6390 hw2.0) - requires ath11k firmware |
 | Bluetooth | Partial | qca6391 - requires qca firmware. hci0 comes up. bluetoothd is not set up and the MAC address is random. Pairing is not tested. |
-| NFC | Untested | nxp,pn553 on i2c1 at 0x28 (nxp-nci driver). The nfc0 device is present. Tag reads are not tested. |
+| NFC | OK | nxp,pn553 on i2c1 at 0x28 (nxp-nci driver). Tested on kernel 7.1.7: `nfc0` powers up, polls, detects ISO14443-A targets, and exchanges ISO-DEP APDUs. There is no neard package, so there are no userspace NFC tools. Card emulation is not supported: the kernel NFC core only supports NFC-DEP in target mode. The antenna is at the top of the back, near the cameras. |
 | USB OTG | OK | pm8150b USB-C controller. Host mode tested with a USB hub. |
 | Battery | Partial | PMIC fuel gauge qcom,pm8150b-fg. Charging works from a computer USB port (5 V). A USB PD wall charger does not charge. No fast charge. |
 | Flash LED | OK | qcom,spmi-flash-led, LED class device `white:flash` |
 | IR TX | OK | ir-spi-led on spi2. Tested with `ir-ctl`. Send NEC codes with `ir-ctl -S nec:0xff00`. |
-| Speaker / earpiece | Not working | cirrus,cs35l41 on i2c3 at 0x40 and 0x41. The amplifiers probe. There is no speaker output. |
+| Speaker / earpiece | Partial | cirrus,cs35l41 on i2c3, fed by Tertiary TDM from the ADSP. Stereo playback works: 0x40 drives the top speaker (left, also the earpiece), 0x41 drives the bottom speaker (right). It needs kernel fixes (q6afe TDM sync/delay, sm8250 TDM hw_params, CS35L41 PLL clock) that are not in the packaged kernel yet. The amplifiers run without Cirrus speaker protection firmware, so keep the volume moderate. No EQ yet. Earpiece for calls is not set up. |
 | Microphones | Not working | qcom,wcd9380. The codec is not enabled in the device tree. |
 | Sensors (accel/gyro/etc.) | Broken | hexagonrpcd + libSSC via SDSP remoteproc. On kernel 7.1.7, `monitor-sensor` finds no sensors and the SLPI remoteproc logs repeated handover messages. Under investigation. |
 | Haptics | OK | awinic,aw8697 on i2c11 at 0x5a. The in-tree `aw86927` driver supports it (kernel 7.1.7). It is a force feedback input device named `aw86927-haptics` (FF_RUMBLE). Test it with `fftest` on its `/dev/input/eventX` node. |
@@ -82,7 +82,8 @@ Split from [N1kroks/firmware-xiaomi-alioth](https://github.com/N1kroks/firmware-
 
 | Package | Description |
 |---------|-------------|
-| `device-xiaomi-alioth` | udev rules, ALSA UCM2, WirePlumber config |
+| `device-xiaomi-alioth` | udev rules; pulls in `audio-xiaomi-alioth` |
+| `audio-xiaomi-alioth` | ALSA UCM2 (speaker and microphone routing), WirePlumber config |
 | `device-xiaomi-alioth-runit` | Runit service configs for hexagonrpcd, qbootctl, iio-sensor-proxy, swclock-offset |
 
 ### System utilities

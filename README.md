@@ -25,24 +25,24 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Display | OK | 90/120Hz, samsung ams667xx01 |
-| Touchscreen | OK | focaltech ft3658 via spi4 |
+| Touchscreen | OK | focaltech,ft8756 on spi4 |
 | GPU | OK | Adreno 650 - requires a650 + a650-zap firmware; optimized OPP table (683/587/510/400/330/205/150 MHz, explicit voltage levels) |
-| WiFi | OK | qca6391 - requires ath11k firmware |
-| Bluetooth | OK | qca6391 - requires qca firmware |
-| NFC | OK | qcom,nq-nci |
-| USB OTG | OK | pm8150b USB-C controller |
-| Battery | OK | qcom,pm8150b-fg |
-| Flash LED | OK | qcom,spmi-flash-led |
+| WiFi | OK | qca6391 (ath11k reports QCA6390 hw2.0) - requires ath11k firmware |
+| Bluetooth | Partial | qca6391 - requires qca firmware. hci0 comes up. bluetoothd is not set up and the MAC address is random. Pairing is not tested. |
+| NFC | Untested | nxp,pn553 on i2c1 at 0x28 (nxp-nci driver). The nfc0 device is present. Tag reads are not tested. |
+| USB OTG | Partial | pm8150b USB-C controller. Device mode and role switch are present. Host mode is not tested. |
+| Battery | Partial | PMIC fuel gauge qcom,pm8150b-fg. Charging works from a computer USB port (5 V). A USB PD wall charger does not charge. No fast charge. |
+| Flash LED | Untested | qcom,spmi-flash-led registers `white:flash`. The LED is not tested. |
 | IR TX | OK | ir-spi-led on spi2. Tested with `ir-ctl`. Send NEC codes with `ir-ctl -S nec:0xff00`. |
-| Speaker / earpiece | WIP | cirrus,cs35l41 on i2c3 at 0x40 and 0x41. The ADSP rejects the TERT TDM port start (port 38). The WCD capture path is under investigation. |
-| Microphones | WIP | qcom,wcd9380. The codec enumerates over soundwire. The mixer tree and the UCM route work. Capture streams for 1 second, then the ADC powers down. Audio routing was added. A vamacro clock retry patch waits for the next kernel build. |
-| Sensors (accel/gyro/etc.) | OK | hexagonrpcd + libSSC via SDSP remoteproc |
+| Speaker / earpiece | Not working | cirrus,cs35l41 on i2c3 at 0x40 and 0x41. The amplifiers probe. There is no speaker output. |
+| Microphones | Not working | qcom,wcd9380. The codec is not enabled in the device tree. |
+| Sensors (accel/gyro/etc.) | Broken | hexagonrpcd + libSSC via SDSP remoteproc. On kernel 7.1.7, `monitor-sensor` finds no sensors and the SLPI remoteproc logs repeated handover messages. Under investigation. |
 | Haptics | OK | awinic,aw8697 on i2c11 at 0x5a. The in-tree `aw86927` driver supports it (kernel 7.1.7). It is a force feedback input device named `aw86927-haptics` (FF_RUMBLE). Test it with `fftest` on its `/dev/input/eventX` node. |
-| GPS | N/A | |
+| GPS | N/A | GNSS is in the SDX55m modem |
 | Calls / SMS / Mobile data | N/A | SDX55m modem not supported in mainline |
 | Camera | OK | All 4 cameras capture on kernel 7.1.7 through camss: main sony,imx582 (48MP), ultrawide sony,imx355 (8MP), macro samsung,s5k5e9 (5MP), front samsung,s5k3t2 (20MP). Main camera autofocus: dongwoon,dw9800 VCM. libcamera tuning and auto exposure are not done yet. |
-| Fingerprint | N/A | |
-| Proximity | N/A | |
+| Fingerprint | N/A | Side-mounted fpc,fpc1020. It needs the Qualcomm TEE. |
+| Proximity | N/A | Ultrasound proximity (Elliptic) on the audio DSP |
 | HW video decode/encode | OK | Venus V4L2M2M at `/dev/video14`-`/dev/video15` - stable on H.264 source; crashes on HEVC source (kernel driver bug) |
 
 Known issue: changing display brightness causes graphical artifacts.

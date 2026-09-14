@@ -1,0 +1,34 @@
+pkgname=audio-xiaomi-alioth
+pkgdesc="Audio configuration for Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth): ALSA UCM2 and WirePlumber"
+pkgver=1
+pkgrel=0
+url="https://github.com/rmuxnet/PKGBUILDs-alioth"
+license=('MIT')
+arch=('any')
+depends=(
+	'alsa-ucm-conf'
+)
+optdepends=(
+	'wireplumber: use the speaker and microphone node settings'
+)
+source=(
+	'ucm2-xiaomi-alioth.conf'
+	'ucm2-HiFi.conf'
+	'wireplumber-51-alioth.conf'
+)
+sha512sums=(
+	'SKIP'
+	'SKIP'
+	'SKIP'
+)
+
+package() {
+	# Card name is "xiaomi-alioth" from DTS &sound { model = "xiaomi-alioth"; }
+	install -Dm644 "${srcdir}/ucm2-xiaomi-alioth.conf" \
+		"${pkgdir}/usr/share/alsa/ucm2/conf.d/sm8250/xiaomi-alioth.conf"
+	install -Dm644 "${srcdir}/ucm2-HiFi.conf" \
+		"${pkgdir}/usr/share/alsa/ucm2/Qualcomm/sm8250/HiFi_alioth.conf"
+
+	install -Dm644 "${srcdir}/wireplumber-51-alioth.conf" \
+		"${pkgdir}/usr/share/wireplumber/wireplumber.conf.d/51-alioth.conf"
+}

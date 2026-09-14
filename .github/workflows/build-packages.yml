@@ -5,6 +5,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'audio-xiaomi-alioth/**'
       - 'bootmac/**'
       - 'device-xiaomi-alioth/**'
       - 'device-xiaomi-alioth-runit/**'
@@ -116,6 +117,7 @@ jobs:
             mkbootimg-alioth
             alioth-kernel-hooks
             firmware-xiaomi-alioth
+            audio-xiaomi-alioth
             device-xiaomi-alioth
             device-xiaomi-alioth-runit
           )

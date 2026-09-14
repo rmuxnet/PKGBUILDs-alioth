@@ -101,7 +101,7 @@ Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux
 | Battery | Partial | PMIC fuel gauge qcom,pm8150b-fg. Charging works from a computer USB port (5 V). A USB PD wall charger does not charge. No fast charge. |
 | Flash LED | OK | qcom,spmi-flash-led, LED class device `white:flash` |
 | IR TX | OK | ir-spi-led on spi2. Tested with `ir-ctl`. Send NEC codes with `ir-ctl -S nec:0xff00`. |
-| Speaker / earpiece | Partial | cirrus,cs35l41 on i2c3, fed by Tertiary TDM from the ADSP. Stereo playback works: 0x40 drives the top speaker (left, also the earpiece), 0x41 drives the bottom speaker (right). It needs kernel fixes (q6afe TDM sync/delay, sm8250 TDM hw_params, CS35L41 PLL clock) that are not in the packaged kernel yet. The amplifiers run without Cirrus speaker protection firmware, so keep the volume moderate. No EQ yet. Earpiece for calls is not set up. |
+| Speaker / earpiece | Partial | cirrus,cs35l41 on i2c3, fed by Tertiary TDM from the ADSP. Stereo playback works: 0x40 drives the top speaker (left, also the earpiece), 0x41 drives the bottom speaker (right). The kernel fixes (q6afe TDM sync/delay, sm8250 TDM hw_params, CS35L41 PLL clock) are on branch 7.1.7/Alioth-FixUP. `audio-xiaomi-alioth` adds a PipeWire EQ sink with per-speaker correction from Xiaomi's alioth Dolby tuning. The amplifiers run without Cirrus speaker protection firmware, so keep the volume moderate. Earpiece for calls is not set up. |
 | Microphones | Not working | qcom,wcd9380. The codec is not enabled in the device tree. |
 | Sensors (accel/gyro/etc.) | Broken | hexagonrpcd + libSSC via SDSP remoteproc. On kernel 7.1.7, `monitor-sensor` finds no sensors and the SLPI remoteproc logs repeated handover messages. Under investigation. |
 | Haptics | OK | awinic,aw8697 on i2c11 at 0x5a. The in-tree `aw86927` driver supports it (kernel 7.1.7). It is a force feedback input device named `aw86927-haptics` (FF_RUMBLE). Test it with `fftest` on its `/dev/input/eventX` node. |
@@ -151,7 +151,7 @@ Split from [N1kroks/firmware-xiaomi-alioth](https://github.com/N1kroks/firmware-
 | Package | Description |
 |---------|-------------|
 | `device-xiaomi-alioth` | udev rules; pulls in `audio-xiaomi-alioth` |
-| `audio-xiaomi-alioth` | ALSA UCM2 (speaker and microphone routing), WirePlumber config |
+| `audio-xiaomi-alioth` | ALSA UCM2 speaker routing, WirePlumber config, PipeWire speaker EQ |
 | `device-xiaomi-alioth-runit` | Runit service configs for hexagonrpcd, qbootctl, iio-sensor-proxy, swclock-offset |
 
 ### System utilities

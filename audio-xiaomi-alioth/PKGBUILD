@@ -1,7 +1,7 @@
 pkgname=audio-xiaomi-alioth
-pkgdesc="Audio configuration for Xiaomi POCO F3 / Redmi K40 / Mi 11X (alioth): ALSA UCM2 and WirePlumber"
+pkgdesc="Audio configuration for Xiaomi POCO F3 / Redmi K40 / Mi 11X (alioth): ALSA UCM2, WirePlumber and speaker EQ"
 pkgver=1
-pkgrel=0
+pkgrel=1
 url="https://github.com/rmuxnet/PKGBUILDs-alioth"
 license=('MIT')
 arch=('any')
@@ -9,14 +9,17 @@ depends=(
 	'alsa-ucm-conf'
 )
 optdepends=(
-	'wireplumber: use the speaker and microphone node settings'
+	'pipewire: speaker EQ filter-chain'
+	'wireplumber: speaker node settings'
 )
 source=(
 	'ucm2-xiaomi-alioth.conf'
 	'ucm2-HiFi.conf'
 	'wireplumber-51-alioth.conf'
+	'pipewire-50-alioth-speaker-eq.conf'
 )
 sha512sums=(
+	'SKIP'
 	'SKIP'
 	'SKIP'
 	'SKIP'
@@ -31,4 +34,7 @@ package() {
 
 	install -Dm644 "${srcdir}/wireplumber-51-alioth.conf" \
 		"${pkgdir}/usr/share/wireplumber/wireplumber.conf.d/51-alioth.conf"
+
+	install -Dm644 "${srcdir}/pipewire-50-alioth-speaker-eq.conf" \
+		"${pkgdir}/usr/share/pipewire/pipewire.conf.d/50-alioth-speaker-eq.conf"
 }

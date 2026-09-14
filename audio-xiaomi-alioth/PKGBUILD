@@ -1,5 +1,5 @@
 pkgname=audio-xiaomi-alioth
-pkgdesc="Audio configuration for Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth): ALSA UCM2 and WirePlumber"
+pkgdesc="Audio configuration for Xiaomi POCO F3 / Redmi K40 / Mi 11X (alioth): ALSA UCM2 and WirePlumber"
 pkgver=1
 pkgrel=0
 url="https://github.com/rmuxnet/PKGBUILDs-alioth"

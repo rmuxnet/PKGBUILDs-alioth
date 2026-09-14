@@ -1,8 +1,8 @@
 pkgname=device-xiaomi-alioth-runit
-pkgdesc="Package containing Runit configurations for Xiaomi Mi 11i / Redmi K40 / POCO F3 (alioth)"
+pkgdesc="Package containing Runit configurations for Xiaomi POCO F3 / Redmi K40 / Mi 11X (alioth)"
 pkgver=1
 pkgrel=1
-url="https://postmarketos.org"
+url="https://github.com/rmuxnet/PKGBUILDs-alioth"
 license=('MIT')
 arch=('aarch64')
 groups=('runit-alioth-armtix')

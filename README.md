@@ -1,24 +1,91 @@
 # PKGBUILDs-alioth
 
-Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux aarch64, runit) on the Xiaomi POCO F3 / Mi 11i / Redmi K40 (codename **alioth**).
+Arch-based PKGBUILDs for running [ARMtix](https://armtixlinux.org/) (Artix Linux aarch64, runit) on the Xiaomi POCO F3 / Redmi K40 / Mi 11X (codename **alioth**).
 
 <p align="center">
   <img src="https://wiki.postmarketos.org/images/thumb/7/71/Xiaomi-alioth.png/659px-Xiaomi-alioth.png" width="300" alt="Xiaomi POCO F3 (alioth)">
 </p>
 
-## Device
+## Device specifications
 
-| | |
-|---|---|
-| **Names** | Xiaomi POCO F3 / Mi 11i / Redmi K40 |
-| **Codename** | alioth |
-| **SoC** | Qualcomm Snapdragon 870 (SM8250-AC) |
-| **CPU** | 1x Kryo 585 Prime (stock 3.19GHz, capped at 2.84GHz in DTS) + 3x Gold @ 2.42GHz + 4x Silver @ 1.80GHz |
-| **RAM** | 6 / 8 GB LPDDR5 |
-| **Storage** | 128 / 256 GB UFS 3.1 |
-| **Display** | 6.67" AMOLED 1080x2400, 120Hz, HDR10+ |
-| **Architecture** | aarch64 |
-| **Released** | 2021 |
+<table>
+    <tbody>
+        <tr>
+            <td>Basic</td>
+            <td colspan="3">Spec Sheet</td>
+        </tr>
+        <tr>
+            <td>Model</td>
+            <td>Redmi K40</td>
+            <td>POCO F3</td>
+            <td>Xiaomi Mi 11X</td>
+        </tr>
+        <tr>
+            <td>Codename</td>
+            <td colspan="3">alioth</td>
+        </tr>
+        <tr>
+            <td>Released</td>
+            <td>March 2021</td>
+            <td>March 2021</td>
+            <td>April 2021</td>
+        </tr>
+        <tr>
+            <td>SoC</td>
+            <td colspan="3">Qualcomm SM8250-AC Snapdragon 870 5G (7 nm)</td>
+        </tr>
+        <tr>
+            <td>CPU</td>
+            <td colspan="3">Octa-core (1x3.2 GHz Kryo 585 &amp; 3x2.42 GHz Kryo 585 &amp; 4x1.80 GHz Kryo 585). The prime core is capped at 2.84 GHz in the mainline DTS.</td>
+        </tr>
+        <tr>
+            <td>GPU</td>
+            <td colspan="3">Adreno 650</td>
+        </tr>
+        <tr>
+            <td>Memory</td>
+            <td>128GB 6GB RAM, 128GB 8GB RAM, 256GB 8GB RAM, 256GB 12GB RAM</td>
+            <td>128GB 6GB RAM, 128GB 8GB RAM, 256GB 8GB RAM</td>
+            <td>128GB 6GB RAM, 128GB 8GB RAM</td>
+        </tr>
+        <tr>
+            <td>Memory type</td>
+            <td colspan="3">LPDDR5 RAM, UFS 3.1 storage</td>
+        </tr>
+        <tr>
+            <td>Shipped Android Version</td>
+            <td colspan="3">Android 11 (MIUI 12)</td>
+        </tr>
+        <tr>
+            <td>Battery</td>
+            <td colspan="3">Li-Po 4520 mAh, non-removable, 33W wired</td>
+        </tr>
+        <tr>
+            <td>Display</td>
+            <td colspan="3">6.67", 1080 x 2400 pixels, 20:9 ratio (~395 ppi density), AMOLED, 120Hz, HDR10+, 1300 nits (peak)</td>
+        </tr>
+        <tr>
+            <td>Camera (Wide)</td>
+            <td colspan="3">48 MP, f/1.8, 26mm (wide), 1/2.0", 0.8&micro;m, PDAF (Sony IMX582)</td>
+        </tr>
+        <tr>
+            <td>Camera (Ultrawide)</td>
+            <td colspan="3">8 MP, f/2.2, 119&deg; (ultrawide) (Sony IMX355)</td>
+        </tr>
+        <tr>
+            <td>Camera (Macro)</td>
+            <td colspan="3">5 MP, f/2.4, 50mm (macro), AF (Samsung S5K5E9)</td>
+        </tr>
+        <tr>
+            <td>Camera (Front)</td>
+            <td colspan="3">20 MP, f/2.5, (wide), 1/3.4", 0.8&micro;m (Samsung S5K3T2)</td>
+        </tr>
+        <tr>
+            <td>Audio</td>
+            <td colspan="3">Stereo speakers (2x Cirrus Logic CS35L41), no headphone jack</td>
+        </tr>
+    </tbody>
+</table>
 
 ## Hardware status
 
@@ -53,14 +120,15 @@ Known issue: changing display brightness causes graphical artifacts.
 
 | Package | Description |
 |---------|-------------|
-| `linux-alioth-7p1-ThinLTO-5k` | Kernel 7.1.2, Clang ThinLTO, 5000mAh battery - recommended for desktop/server use |
-| `linux-alioth-7p1-ThinLTO-4p52k` | Same, stock 4520mAh battery |
-| `linux-alioth-7p1-Server-ThinLTO-5k` | Server variant: PREEMPT_NONE, HZ=250, full tickless, BBR, RCU offload, 5000mAh battery |
-| `linux-alioth-7p1-Server-ThinLTO-4p52k` | Same, stock 4520mAh battery |
-| `linux-alioth-7p1-*-headers` | Headers for each variant |
+| `linux-alioth-7p7-ThinLTO-5k` | Kernel 7.1.7, Clang ThinLTO, 5000mAh battery - recommended for desktop use |
+| `linux-alioth-7p7-ThinLTO-4p52k` | Same, stock 4520mAh battery |
+| `linux-alioth-7p7-Server-ThinLTO-5k` | Server variant: PREEMPT_NONE, HZ=250, full tickless, BBR, RCU offload, 5000mAh battery |
+| `linux-alioth-7p7-Server-ThinLTO-4p52k` | Same, stock 4520mAh battery |
+| `linux-alioth-7p7-*-headers` | Headers for each variant |
+| `linux-alioth-7p1-*` | Older kernel 7.1.2 packages, same variants |
 | `alioth-kernel-hooks` | Pacman hooks to rebuild initramfs and flash `boot.img` on kernel upgrade |
 
-All variants built with `LLVM=1` (Clang + lld) targeting arm64. Based on Linux 7.1.2 stable ([rmuxnet/linux, branch alioth/7.1.2](https://github.com/rmuxnet/linux/tree/alioth/7.1.2)) with alioth-specific patches: prime CPU capped at 2.84GHz, optimized Adreno 650 OPP table, hardware video decoding, and other device enablement.
+All variants built with `LLVM=1` (Clang + lld) targeting arm64. Based on Linux 7.1.7 stable ([rmuxnet/linux, branch alioth/7.1.7](https://github.com/rmuxnet/linux/tree/alioth/7.1.7)) with alioth-specific patches: prime CPU capped at 2.84GHz, optimized Adreno 650 OPP table, hardware video decoding, and other device enablement.
 
 ### Firmware
 
@@ -117,7 +185,7 @@ Then:
 
 ```sh
 pacman -Sy
-pacman -S linux-alioth-7p1-Server-ThinLTO-5k device-xiaomi-alioth device-xiaomi-alioth-runit
+pacman -S linux-alioth-7p7-Server-ThinLTO-5k device-xiaomi-alioth device-xiaomi-alioth-runit
 ```
 
 ## Prebuilt rootfs
@@ -165,7 +233,7 @@ Android's dtbo overlays conflict with the mainline DTS and will prevent the devi
 
 ```sh
 git clone https://github.com/rmuxnet/PKGBUILDs-alioth
-cd PKGBUILDs-alioth/linux-alioth-7p1
+cd PKGBUILDs-alioth/linux-alioth-7p7
 bash build.sh thin        # ThinLTO
 bash build.sh server-thin # server-optimised ThinLTO
 ```
@@ -176,7 +244,7 @@ Requires Clang, lld, and standard kernel build deps. Must not run as root.
 
 | Workflow | Trigger | Output |
 |----------|---------|--------|
-| `build-fullto.yml` | push to `linux-alioth-7p1/**`, manual | All kernel variants -> `repo` release |
+| `build-fullto.yml` | push to `linux-alioth-7p1/**` or `linux-alioth-7p7/**`, manual | All kernel variants -> `repo` release |
 | `build-packages.yml` | push to any non-kernel package, manual | Extra packages -> `repo` release |
 | `build-bootimg.yml` | manual | `boot.img` artifact (quick, no full kernel build) |
 | `build-rootfs.yml` | manual | Full rootfs tarball + boot.img -> versioned release |
@@ -189,7 +257,7 @@ UART TX is below the sub-board connector on the left side of the board, next to 
 
 ## Links
 
-- [Kernel source (rmuxnet/linux, branch alioth/7.1.2)](https://github.com/rmuxnet/linux/tree/alioth/7.1.2)
+- [Kernel source (rmuxnet/linux, branch alioth/7.1.7)](https://github.com/rmuxnet/linux/tree/alioth/7.1.7)
 - [Firmware repo](https://github.com/N1kroks/firmware-xiaomi-alioth)
 - [PostmarketOS device page](https://wiki.postmarketos.org/wiki/Xiaomi_POCO_F3_(xiaomi-alioth))
 - [ARMtix Linux](https://armtixlinux.org/)

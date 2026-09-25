@@ -152,6 +152,7 @@ jobs:
         with:
           name: pkg-extra
           path: /dist/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: warn
 
   publish:

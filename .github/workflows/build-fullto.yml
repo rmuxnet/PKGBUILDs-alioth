@@ -39,6 +39,7 @@ jobs:
         with:
           name: pkg-7p1-thin-5k
           path: linux-alioth-7p1/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   build-7p1-thin-4p52k:
@@ -67,6 +68,7 @@ jobs:
         with:
           name: pkg-7p1-thin-4p52k
           path: linux-alioth-7p1/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   build-7p1-server-thin-5k:
@@ -95,6 +97,7 @@ jobs:
         with:
           name: pkg-7p1-server-thin-5k
           path: linux-alioth-7p1/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   build-7p1-server-thin-4p52k:
@@ -123,6 +126,7 @@ jobs:
         with:
           name: pkg-7p1-server-thin-4p52k
           path: linux-alioth-7p1/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   build-7p7-thin-5k:
@@ -151,6 +155,7 @@ jobs:
         with:
           name: pkg-7p7-thin-5k
           path: linux-alioth-7p7/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   build-7p7-thin-4p52k:
@@ -179,6 +184,7 @@ jobs:
         with:
           name: pkg-7p7-thin-4p52k
           path: linux-alioth-7p7/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   build-7p7-server-thin-5k:
@@ -207,6 +213,7 @@ jobs:
         with:
           name: pkg-7p7-server-thin-5k
           path: linux-alioth-7p7/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   build-7p7-server-thin-4p52k:
@@ -235,6 +242,7 @@ jobs:
         with:
           name: pkg-7p7-server-thin-4p52k
           path: linux-alioth-7p7/*.pkg.tar.*
+          retention-days: 1
           if-no-files-found: error
 
   # ── publish ─────────────────────────────────────────────────────────────────
